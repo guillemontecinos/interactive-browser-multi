@@ -16,14 +16,18 @@
         // Source: https://socket.io/docs/#Using-with-Express
         // TODO: update this address with the current IP
         let socket = io.connect('http://localhost')
-        socket.on('connection answer', function(data){
-            console.log(data)
-        })
+        // socket.on('connection answer', function(data){
+        //     console.log(data)
+        // })
+        
+        let name = 'myName'
 
         function setup(){
             createCanvas(800, 500)
             strokeWeight(5)
             rect(0, 0, width, height)
+            // emit name
+            socket.emit('nickname', name)
         }
 
         function mouseMoved(){

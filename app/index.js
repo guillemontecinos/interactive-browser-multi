@@ -8,7 +8,7 @@ const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 
-
+let users = []
 
 // HTTP framework for socket
 const httpPort = 80
@@ -27,9 +27,17 @@ app.get('/receiver', function (req, res){
 
 // Socket events
 io.on('connection', function (socket){
-    socket.emit('connection answer', {hello: 'hello sender!'})
+    // socket.emit('connection answer', {hello: 'hello sender!'})
+    socket.username = users.length
+    console.log('new user #' + socket.username)
+
+    socket.on('nickname', function(data){
+        users[Number(socket.username)] = data
+        console.log(users)
+    })
+
     socket.on('mouse moved', function (data){
-        console.log(data)
+        // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y)
         socket.broadcast.emit('to receiver', data)
     })
 })
