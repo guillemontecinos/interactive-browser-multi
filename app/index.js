@@ -27,18 +27,24 @@ app.get('/receiver', function (req, res){
 
 // Socket events
 io.on('connection', function (socket){
-    // socket.emit('connection answer', {hello: 'hello sender!'})
-    socket.username = users.length
-    console.log('new user #' + socket.username)
 
     socket.on('nickname', function(data){
-        users[Number(socket.username)] = data
-        console.log(users)
+        socket.username = data
+        users.push({id: socket.id, username: data})
+        // console.log(users)
+        console.log(socket.username + ' connected')
     })
 
     socket.on('mouse moved', function (data){
         // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y)
         socket.broadcast.emit('to receiver', data)
+    })
+
+    socket.on('disconnect', function(){
+        console.log(socket.username + ' disconnected.')
+        // find the element's position within users and remove it
+        let index = users.findIndex(element => element.id === socket.id)
+        users.splice(index, 1)
     })
 })
 

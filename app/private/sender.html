@@ -9,25 +9,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 </head>
 <body>
+    <div class="username-input">
+        <input class="username-value" type="text" id="username-value">
+        <button class="username-submit" id="username-submit">Submit</button>
+    </div>
     <script>
         // Interactive Browser Multiuser - Sender
         // by Guillermo Montecinos
 
         // Source: https://socket.io/docs/#Using-with-Express
         // TODO: update this address with the current IP
-        let socket = io.connect('http://localhost')
-        // socket.on('connection answer', function(data){
-        //     console.log(data)
-        // })
         
-        let name = 'myName'
+        let socket, name = '', input, button
 
         function setup(){
+            input = document.getElementById('username-value')
+            button = document.getElementById('username-submit')
+            button.addEventListener('click', buttonSubmit)
+        }
+
+        function buttonSubmit(){
+            if(input.value == '') return
+            name = input.value
+            socket = io.connect('http://localhost')
+            socket.emit('nickname', name)
+
+            input.remove()
+            button.remove()
+            
             createCanvas(800, 500)
             strokeWeight(5)
             rect(0, 0, width, height)
-            // emit name
-            socket.emit('nickname', name)
         }
 
         function mouseMoved(){
