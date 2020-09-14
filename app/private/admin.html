@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Admin</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+</head>
+<body>
+    <script>
+        // Interactive Browser Multiuser - Admin
+        // by Guillermo Montecinos
+
+        // Source: https://socket.io/docs/#Using-with-Express
+        // TODO: update this address with the current IP
+        let socket = io.connect('http://localhost')
+        socket.emit('nickname', 'admin')
+
+        let clients = []
+
+        socket.on('new client to admin', function(data){
+            console.log(data)
+            // create a div that stores the canvas
+            let container = document.createElement('div')
+            let name = document.createElement('div')
+            name.className = 'user-name'
+            name.innerHTML = data.username
+            let sketch = document.createElement('div')
+            sketch.id = data.id
+            container.appendChild(name)
+            container.appendChild(sketch)
+            document.body.appendChild(container)
+            // saves the data in the clients array
+            clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id))})
+            // console.log(clients)
+        })
+
+        socket.on('disconnect to admin', function(data){
+            // get rid of the container
+            document.getElementById(data.id).parentElement.remove()
+            // remove client from the clients array
+            let index = clients.findIndex(element => element.id === data.id)
+            clients.splice(index, 1)
+            // console.log(clients)
+        })
+
+        socket.on('data to admin', function(data){
+            let index = clients.findIndex(element => element.id === data.id)
+            // update circle position of the client
+            clients[index].instance.fill(255)
+            clients[index].instance.strokeWeight(5)
+            clients[index].instance.rect(0, 0, clients[index].instance.width, clients[index].instance.height)
+            clients[index].instance.fill(0)
+            clients[index].instance.ellipse(clients[index].instance.map(data.x, 0, 1, 0, clients[index].instance.width), clients[index].instance.map(data.y, 0, 1, 0, clients[index].instance.height), 10, 10)
+        })
+
+        // declare constructor for each canvas visualizator
+        const s = function(sketch){
+            sketch.setup = function(){
+                sketch.createCanvas(400, 250)
+                sketch.strokeWeight(5)
+                sketch.rect(0, 0, sketch.width, sketch.height)
+            }
+        }
+    </script>
+</body>
+</html>

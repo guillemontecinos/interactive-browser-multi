@@ -8,7 +8,7 @@ const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 
-let users = []
+let clients = [], adimConnected = false
 
 // HTTP framework for socket
 const httpPort = 80
@@ -16,35 +16,37 @@ server.listen(httpPort)
 
 // on get '/' send sender
 app.get('/', function (req, res){
-    res.sendFile(path.join(__dirname, '/private/sender.html'))
+    res.sendFile(path.join(__dirname, '/private/client.html'))
 })
 
-app.get('/receiver', function (req, res){
-    res.sendFile(path.join(__dirname, '/private/receiver.html'))
+app.get('/admin', function (req, res){
+    res.sendFile(path.join(__dirname, '/private/admin.html'))
 })
-
-// on get '/receiver' send receiver
 
 // Socket events
 io.on('connection', function (socket){
 
     socket.on('nickname', function(data){
         socket.username = data
-        users.push({id: socket.id, username: data})
-        // console.log(users)
+        if(data == 'admin') adimConnected = true
+        else socket.broadcast.emit('new client to admin', {id: socket.id, username: socket.username})
+        clients.push({id: socket.id, username: data})
         console.log(socket.username + ' connected')
     })
 
     socket.on('mouse moved', function (data){
         // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y)
-        socket.broadcast.emit('to receiver', data)
+        // socket.broadcast.emit('data to admin', data)
+        socket.broadcast.emit('data to admin', {id: socket.id, username: socket.username, x: data.x, y: data.y})
     })
 
     socket.on('disconnect', function(){
-        console.log(socket.username + ' disconnected.')
-        // find the element's position within users and remove it
-        let index = users.findIndex(element => element.id === socket.id)
-        users.splice(index, 1)
+        if(socket.username == 'admin') adimConnected = false
+        socket.broadcast.emit('disconnect to admin', {id: socket.id})
+        console.log(socket.username + ' disconnected')
+        // find the element's position within clients and remove it
+        let index = clients.findIndex(element => element.id === socket.id)
+        clients.splice(index, 1)
     })
 })
 
