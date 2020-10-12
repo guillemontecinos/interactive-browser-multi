@@ -15,7 +15,8 @@
 
         // Source: https://socket.io/docs/#Using-with-Express
         // TODO: update this address with the current IP
-        let socket = io.connect('http://localhost')
+        let url = location.host.split(':')[0]
+        let socket = io.connect(url)
         socket.emit('nickname', 'admin')
 
         let clients = []

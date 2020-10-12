@@ -32,8 +32,7 @@
             if(input.value == '') return
             name = input.value
 
-            if(isMobile()) url = 'http://192.168.1.8'
-            else url = 'http://localhost'
+            let url = location.host.split(':')[0]
 
             socket = io.connect(url)
             socket.emit('nickname', name)
