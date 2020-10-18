@@ -20,7 +20,7 @@
         // Source: https://socket.io/docs/#Using-with-Express
         // TODO: update this address with the current IP
         
-        let socket, name = '', input, button
+        let socket, name = '', input, button, onInterface = false, curves = {shape: []}
 
         function setup(){
             input = document.getElementById('username-value')
@@ -43,34 +43,71 @@
             createCanvas(800, 500)
             strokeWeight(5)
             rect(0, 0, width, height)
+
+            onInterface = true
         }
 
         // Mouse moved event for desktop devices
-        function mouseMoved(){
-            updateMouse()
+        function mousePressed(){
+            // updateMouse()
+            curveStart()
+        }
+
+        function mouseDragged(){
+            // updateMouse()
+            curveDuring()
+        }
+
+        function mouseReleased(){
+            // updateMouse()
+            curveDuring()
         }
 
         // Touch events for mobile devices
         function touchStarted(){
-            updateMouse()
+            // updateMouse()
+            curveStart()
             return false
         }
 
         function touchMoved(){
-            updateMouse()
+            // updateMouse()
+            curveDuring()
             return false
         }
 
         function touchEnded(){
-            updateMouse()
+            // updateMouse()
+            curveDuring()
             return false
         }
 
-        function updateMouse(){
-            let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
-            let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
-            console.log('x: ' + x + ', y: ' + y)
-            socket.emit('mouse moved', {x: x, y: y})
+        // function updateMouse(){
+        //     let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
+        //     let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
+        //     console.log('x: ' + x + ', y: ' + y)
+        //     socket.emit('mouse moved', {x: x, y: y})
+        // }
+
+        function curveStart(){
+            if(onInterface){
+                curves.shape.push([])
+                curveDuring()
+            }
+        }
+
+        function curveDuring(){
+            if(onInterface){
+                curves.shape[curves.shape.length - 1].push({x: mouseX, y: mouseY})
+                drawCurve()
+                console.log(curves)
+                socket.emit('mouse moved', curves)
+            }
+        }
+
+        function drawCurve(){
+            let aux = curves.shape[curves.shape.length - 1]
+            line(aux[aux.length - 2].x, aux[aux.length - 2].y, aux[aux.length - 1].x, aux[aux.length - 1].y)
         }
 
         //check if the user is mobile
