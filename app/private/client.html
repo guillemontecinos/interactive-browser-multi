@@ -98,7 +98,10 @@
 
         function curveDuring(){
             if(onInterface){
-                curves.shape[curves.shape.length - 1].push({x: mouseX, y: mouseY})
+                let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
+                let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
+                // console.log('x: ' + x + ', y: ' + y)
+                curves.shape[curves.shape.length - 1].push({x: x, y: y})
                 drawCurve()
                 console.log(curves)
                 socket.emit('mouse moved', curves)
