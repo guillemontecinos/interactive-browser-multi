@@ -34,7 +34,7 @@
             container.appendChild(sketch)
             document.body.appendChild(container)
             // saves the data in the clients array
-            clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id))})
+            clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id)), shape: []})
             // console.log(clients)
         })
 
@@ -50,18 +50,36 @@
         socket.on('data to admin', function(data){
             let index = clients.findIndex(element => element.id === data.id)
             // update circle position of the client
-            clients[index].instance.fill(255)
-            clients[index].instance.strokeWeight(5)
-            clients[index].instance.rect(0, 0, clients[index].instance.width, clients[index].instance.height)
-            clients[index].instance.fill(0)
-            clients[index].instance.ellipse(clients[index].instance.map(data.x, 0, 1, 0, clients[index].instance.width), clients[index].instance.map(data.y, 0, 1, 0, clients[index].instance.height), 10, 10)
+            console.log(clients[index].shape)
+            if(data.action == 'start'){
+                clients[index].shape.push([])
+                pointReceived(clients[index], data)
+            }
+            else if(data.action == 'dragged'){
+                pointReceived(clients[index], data)
+            }
+            else if(data.action == 'reset'){
+                resetClient(clients[index])
+            }
         })
+
+        function pointReceived(element, data){
+            element.shape[element.shape.length - 1].push({x: data.x, y: data.y})
+            let aux = element.shape[element.shape.length - 1]
+            if(aux.length >= 2) element.instance.line(aux[aux.length - 2].x * element.instance.width, aux[aux.length - 2].y * element.instance.height, aux[aux.length - 1].x * element.instance.width, aux[aux.length - 1].y * element.instance.height)
+        }
+
+        function resetClient(element){
+            element.instance.background(255)
+            element.instance.rect(0, 0, element.instance.width, element.instance.height)
+            element.shape = []
+        }
 
         // declare constructor for each canvas visualizator
         const s = function(sketch){
             sketch.setup = function(){
                 sketch.createCanvas(400, 250)
-                sketch.strokeWeight(5)
+                sketch.strokeWeight(3)
                 sketch.rect(0, 0, sketch.width, sketch.height)
             }
         }

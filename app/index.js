@@ -34,10 +34,10 @@ io.on('connection', function (socket){
         console.log(socket.username + ' connected')
     })
 
-    socket.on('mouse moved', function (data){
-        // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y)
+    socket.on('client interacted', function (data){
+        console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y + 'action: ' + data.action)
         // socket.broadcast.emit('data to admin', data)
-        socket.broadcast.emit('data to admin', {id: socket.id, username: socket.username, x: data.x, y: data.y})
+        socket.broadcast.emit('data to admin', {id: socket.id, username: socket.username, x: data.x, y: data.y, action: data.action})
     })
 
     socket.on('disconnect', function(){

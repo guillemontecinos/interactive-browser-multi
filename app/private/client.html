@@ -20,7 +20,7 @@
         // Source: https://socket.io/docs/#Using-with-Express
         // TODO: update this address with the current IP
         
-        let socket, name = '', input, button, onInterface = false, curves = {shape: []}
+        let socket, name = '', input, button, onInterface = false, curves = {shape: []}, clearBtn
 
         function setup(){
             input = document.getElementById('username-value')
@@ -40,77 +40,92 @@
             input.remove()
             button.remove()
             
-            createCanvas(800, 500)
+            // if(isMobile == true){
+            //     createCanvas(windowWidth, windowHeight)
+            // }
+            // else{
+                createCanvas(800, 500)
+            // }
             strokeWeight(5)
             rect(0, 0, width, height)
 
             onInterface = true
+
+            // create clear button
+            clearBtn = createButton('CLEAR')
+            clearBtn.mousePressed(clearCurves)
         }
 
         // Mouse moved event for desktop devices
         function mousePressed(){
-            // updateMouse()
-            curveStart()
+            if(onInterface && mouseX <= width && mouseY <= height){
+                let pos = curveStart()
+                socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'start'}) 
+            }
         }
 
         function mouseDragged(){
-            // updateMouse()
-            curveDuring()
+            if(onInterface && mouseX <= width && mouseY <= height){
+                let pos = curveDuring()
+                socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+            }
         }
 
         function mouseReleased(){
-            // updateMouse()
-            curveDuring()
+            // don't do anything
         }
 
         // Touch events for mobile devices
         function touchStarted(){
-            // updateMouse()
-            curveStart()
+            if(onInterface && mouseX <= width && mouseY <= height){
+                let pos = curveStart()
+                socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'start'})
+            }
             return false
         }
 
         function touchMoved(){
-            // updateMouse()
-            curveDuring()
+            if(onInterface && mouseX <= width && mouseY <= height){
+                let pos = curveDuring()
+                socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+            }            
             return false
         }
 
         function touchEnded(){
-            // updateMouse()
-            curveDuring()
             return false
         }
 
-        // function updateMouse(){
-        //     let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
-        //     let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
-        //     console.log('x: ' + x + ', y: ' + y)
-        //     socket.emit('mouse moved', {x: x, y: y})
-        // }
-
         function curveStart(){
-            if(onInterface){
-                curves.shape.push([])
-                curveDuring()
-            }
+            curves.shape.push([])
+            let pos = curveDuring()
+            return pos
         }
 
         function curveDuring(){
-            if(onInterface){
-                let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
-                let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
-                // console.log('x: ' + x + ', y: ' + y)
-                curves.shape[curves.shape.length - 1].push({x: x, y: y})
-                drawCurve()
-                console.log(curves)
-                socket.emit('mouse moved', curves)
-            }
+            let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
+            let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
+            // console.log('x: ' + x + ', y: ' + y)
+            curves.shape[curves.shape.length - 1].push({x: x, y: y})
+            drawCurve()
+            return {x: x, y: y}
         }
 
         function drawCurve(){
             let aux = curves.shape[curves.shape.length - 1]
-            line(aux[aux.length - 2].x, aux[aux.length - 2].y, aux[aux.length - 1].x, aux[aux.length - 1].y)
+            if(aux.length >= 2) line(aux[aux.length - 2].x * width, aux[aux.length - 2].y * height, aux[aux.length - 1].x * width, aux[aux.length - 1].y * height)
+        }
+
+        function clearCurves(){
+            curves = {shape: []}
+            background(255)
+            rect(0, 0, width, height)
+            socket.emit('client interacted', {x: 0, y: 0, action: 'reset'})
+        }
+
+        function isLandscape(){
+            if(window.screen.orientation.type == 'landscape-primary' || window.screen.orientation.type == 'landscape-secondary') return true
+            else return false
         }
 
         //check if the user is mobile
