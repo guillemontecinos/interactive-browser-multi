@@ -14,13 +14,15 @@ let clients = [], adimConnected = false
 const httpPort = 80
 server.listen(httpPort)
 
+app.use(express.static('public'))
+
 // on get '/' send sender
 app.get('/', function (req, res){
-    res.sendFile(path.join(__dirname, '/private/client.html'))
+    res.sendFile(path.join(__dirname, '/public/client.html'))
 })
 
 app.get('/admin', function (req, res){
-    res.sendFile(path.join(__dirname, '/private/admin.html'))
+    res.sendFile(path.join(__dirname, '/public/admin.html'))
 })
 
 // Socket events
@@ -35,7 +37,7 @@ io.on('connection', function (socket){
     })
 
     socket.on('client interacted', function (data){
-        console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y + 'action: ' + data.action)
+        // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y + 'action: ' + data.action)
         // socket.broadcast.emit('data to admin', data)
         socket.broadcast.emit('data to admin', {id: socket.id, username: socket.username, x: data.x, y: data.y, action: data.action})
     })
