@@ -4,15 +4,41 @@
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Client</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="assets/style/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 </head>
 <body>
-    <div class="username-input">
-        <input class="username-value" type="text" id="username-value">
-        <button class="username-submit" id="username-submit">Submit</button>
+    <div class="client-welcome-alert" id="client-welcome-alert">
+        <div class="top-bar">
+            <div class="top-bar-title">
+                <p>Welcome to the Interactive Browser</p>
+            </div>
+            <div class="top-bar-icons">
+                <div class="minimize-icon">
+                    <img src="assets/icons/minimize-btn.png">
+                </div>
+                <div class="full-screen-icon">
+                    <img src="assets/icons/full-screen-btn.png">
+                </div>
+                <div class="close-icon">
+                    <img src="assets/icons/close-btn.png">
+                </div>
+            </div>
+        </div>
+        <div class="message">
+            <p>
+                In this experience you will be remotely collaborating with a sound performance with your drawings. To start interacting create your username and click start.
+            </p>
+        </div>
+        <div class="input-value">
+            <input type="text" id="username-value">
+        </div>
+        <div class="input-submit">
+            <button id="username-submit">Submit</button>
+        </div>
     </div>
+    <!-- <div class="client-draw-container"></div> -->
     <script src="client.js"></script>
 </body>
 </html>

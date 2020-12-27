@@ -1,0 +1,173 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap");
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+body {
+  line-height: 1;
+  background: #107B7A;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.top-bar {
+  position: relative;
+  height: 35px;
+  background: #0414A5;
+  margin: 2px;
+  top: 2px;
+}
+
+.top-bar .top-bar-title {
+  position: relative;
+  font-family: 'Ubuntu Mono';
+  top: 50%;
+  margin-left: 10px;
+}
+
+.top-bar .top-bar-title p {
+  position: absolute;
+  -webkit-transform: translate(0, -50%);
+          transform: translate(0, -50%);
+  color: white;
+  font-size: large;
+}
+
+.top-bar .top-bar-icons {
+  height: 27px;
+  margin-top: 4px;
+  margin-right: 4px;
+  float: right;
+}
+
+.top-bar .top-bar-icons .minimize-icon {
+  display: inline-block;
+  height: 100%;
+}
+
+.top-bar .top-bar-icons .minimize-icon img {
+  height: 100%;
+}
+
+.top-bar .top-bar-icons .full-screen-icon {
+  display: inline-block;
+  height: 100%;
+}
+
+.top-bar .top-bar-icons .full-screen-icon img {
+  height: 100%;
+}
+
+.top-bar .top-bar-icons .close-icon {
+  display: inline-block;
+  height: 100%;
+}
+
+.top-bar .top-bar-icons .close-icon img {
+  height: 100%;
+}
+
+.message {
+  font-family: 'Ubuntu Mono';
+  width: 80%;
+  margin-top: 18px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.message p {
+  color: black;
+  font-size: large;
+}
+
+.input-value {
+  width: 70%;
+  height: 35px;
+  margin: auto;
+  margin-top: 18px;
+}
+
+.input-value input {
+  width: 98%;
+  height: 100%;
+  border: none;
+  font-family: 'Ubuntu Mono';
+  color: black;
+  font-size: large;
+}
+
+.input-submit {
+  width: 20%;
+  height: 35px;
+  margin: auto;
+  margin-top: 18px;
+}
+
+.input-submit button {
+  width: 100%;
+  height: 100%;
+  border: 2px solid black;
+  font-family: 'Ubuntu Mono';
+  font-size: large;
+  background: #C4C4C4;
+}
+
+.client-welcome-alert {
+  background: #C4C4C4;
+  width: 500px;
+  height: 250px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 250px;
+}
+
+.client-draw-container {
+  width: 100%;
+  height: 100px;
+  background: #C4C4C4;
+}
+/*# sourceMappingURL=style.css.map */

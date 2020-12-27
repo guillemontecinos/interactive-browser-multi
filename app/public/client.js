@@ -21,17 +21,7 @@ function buttonSubmit(){
     socket = io.connect(url)
     socket.emit('nickname', name)
 
-    input.remove()
-    button.remove()
-    
-    // if(isMobile == true){
-    //     createCanvas(windowWidth, windowHeight)
-    // }
-    // else{
-        createCanvas(800, 500)
-    // }
-    strokeWeight(5)
-    rect(0, 0, width, height)
+    createDrawingLayout()
 
     onInterface = true
 
@@ -121,4 +111,56 @@ function isMobile() {
         check = true
     })(navigator.userAgent||navigator.vendor||window.opera)
     return check
+}
+
+function createDrawingLayout(){
+    // TODO: remake all this in HTML just disabling it with css
+    // Follow this to position the canvas: https://github.com/processing/p5.js/wiki/Positioning-your-canvas
+    document.getElementById('client-welcome-alert').remove()
+    document.body.style.background = '#C4C4C4'
+    // Create top bar
+    let topBar = document.createElement('div')
+    topBar.className = 'top-bar'
+    
+    let topBarTitle = document.createElement('div')
+    topBarTitle.className = 'top-bar-title'
+    let p = document.createElement('p')
+    p.innerHTML = 'Interactive Browser Experience – ' + name
+    topBarTitle.appendChild(p)
+
+    let topBarIcons = document.createElement('div')
+    topBarIcons.className = 'top-bar-icons'
+
+    let minimizeIcon = document.createElement('div')
+    minimizeIcon.className = 'minimize-icon'
+    let minimizeImg = document.createElement('img')
+    minimizeImg.src = 'assets/icons/minimize-btn.png'
+    minimizeIcon.appendChild(minimizeImg)
+
+    let fullScreenIcon = document.createElement('div')
+    fullScreenIcon.className = 'full-screen-icon'
+    let fullScreenImg = document.createElement('img')
+    fullScreenImg.src = 'assets/icons/full-screen-btn.png'
+    fullScreenIcon.appendChild(fullScreenImg)
+
+    let closeIcon = document.createElement('div')
+    closeIcon.className = 'close-icon'
+    let closeImg = document.createElement('img')
+    closeImg.src = 'assets/icons/close-btn.png'
+    closeIcon.appendChild(closeImg)
+
+    topBarIcons.appendChild(minimizeIcon)
+    topBarIcons.appendChild(fullScreenIcon)
+    topBarIcons.appendChild(closeIcon)
+
+    topBar.appendChild(topBarTitle)
+    topBar.appendChild(topBarIcons)
+
+    document.body.appendChild(topBar)
+
+
+    createCanvas(800, 500)
+    background(255)
+    strokeWeight(5)
+    // rect(0, 0, width, height)   
 }
