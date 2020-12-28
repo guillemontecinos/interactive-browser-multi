@@ -199,4 +199,89 @@ body {
   margin-left: 200px;
   margin-right: 50px;
 }
+
+.client-instance-container {
+  width: 630px;
+  height: 350px;
+  margin-left: 30px;
+  margin-top: 30px;
+  background: #C4C4C4;
+}
+
+.client-instance-container .client-instance-content {
+  height: calc(100% - 35px - 4px - 2px);
+  width: 100%;
+}
+
+.client-instance-container .client-instance-content .client-instance-canvas-wrapper {
+  display: inline-block;
+  background: white;
+  width: 80%;
+  height: 100%;
+  margin-left: 2px;
+  margin-top: 2px;
+  margin-right: 0;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu {
+  display: inline-block;
+  width: 19%;
+  height: 100%;
+  vertical-align: top;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-midi-channel {
+  width: 90%;
+  height: 35px;
+  margin: auto;
+  margin-top: 4px;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-midi-channel select {
+  width: 100%;
+  height: 100%;
+  font-family: 'Ubuntu Mono';
+  font-size: large;
+  background: #C4C4C4;
+  border: 2px solid black;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo {
+  width: 90%;
+  margin: auto;
+  margin-top: 10px;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo p {
+  font-family: 'Ubuntu Mono';
+  font-size: large;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo .client-instance-tempo-submit {
+  width: calc(100% - 4px);
+  height: 35px;
+  border: 2px solid black;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo .client-instance-tempo-submit .client-instance-tempo-number {
+  display: inline-block;
+  width: 25px;
+  height: 100%;
+  margin-left: 10px;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo .client-instance-tempo-submit .client-instance-tempo-number input {
+  width: 25px;
+  height: 70%;
+  margin-top: 4px;
+  font-family: 'Ubuntu Mono';
+  font-size: large;
+  text-align: center;
+  border: none;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo .client-instance-tempo-submit p {
+  display: inline-block;
+  margin-left: 10px;
+}
 /*# sourceMappingURL=style.css.map */
