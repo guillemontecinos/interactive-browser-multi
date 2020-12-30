@@ -11,7 +11,23 @@
     <script src="https://cdn.jsdelivr.net/npm/webmidi"></script>
 </head>
 <body>
-    <div class="client-instance-container">
+    <div class="admin-menu">
+        <div class="midi-port">
+            <select class="midi-port-dropdown" id="midi-port-dropdown">
+                <option>auxVirtualPort Bus 1</option>
+            </select>
+        </div>
+        <div class="tempo-submit">
+            <div class="tempo-number">
+                <input type="text" value="4" placeholder="4" id="tempo-numerator" onfocus="this.value=''">
+            </div>
+            <p>/</p>
+            <div class="tempo-number">
+                <input type="text" value="4" placeholder="4" id="tempo-denominator" onfocus="this.value=''">
+            </div>
+        </div>
+    </div>
+    <!-- <div class="client-instance-container">
         <div class="top-bar">
             <div class="top-bar-title">
                 <p>User 1</p>
@@ -36,21 +52,9 @@
                         <option>Ch. #1</option>
                     </select>
                 </div>
-                <div class="client-instance-tempo">
-                    <p>Tempo</p>
-                    <div class="client-instance-tempo-submit">
-                        <div class="client-instance-tempo-number">
-                            <input type="text" value="4" id="client-instance-tempo-numerator">
-                        </div>
-                        <p>/</p>
-                        <div class="client-instance-tempo-number">
-                            <input type="text" value="4" id="client-instance-tempo-denominator">
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <script src="admin.js"></script>
 </body>
 </html>

@@ -12,28 +12,18 @@ let clients = []
 socket.on('new client to admin', function(data){
     console.log(data)
     // create a div that stores the canvas
-    let container = document.createElement('div')
-    let name = document.createElement('div')
-    name.className = 'user-name'
-    name.innerHTML = data.username
-    let sketch = document.createElement('div')
-    sketch.id = data.id
-    container.appendChild(name)
-    container.appendChild(sketch)
-    document.body.appendChild(container)
     // saves the data in the clients array
     // TODO: channel has to be setup based on the user's decision, this is just for testing
-    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id)), shape: [], channel: clients.length + 1})
-    // console.log(clients)
+    makeClientLayout(data.id, data.username)
+    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: clients.length + 1})
 })
 
 socket.on('disconnect to admin', function(data){
     // get rid of the container
-    document.getElementById(data.id).parentElement.remove()
+    document.getElementById(data.id + '-container').remove()
     // remove client from the clients array
     let index = clients.findIndex(element => element.id === data.id)
     clients.splice(index, 1)
-    // console.log(clients)
 })
 
 socket.on('data to admin', function(data){
@@ -67,9 +57,8 @@ function resetClient(element){
 // declare constructor for each canvas visualizator
 const s = function(sketch){
     sketch.setup = function(){
-        sketch.createCanvas(400, 250)
+        sketch.createCanvas(document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientWidth, document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientHeight)
         sketch.strokeWeight(3)
-        sketch.rect(0, 0, sketch.width, sketch.height)
     }
 }
 
@@ -78,6 +67,26 @@ let ppqnCount = 0
 let barCount = 1
 let octaves = 1
 let timeNumerator = 4, timeDenominator = 4
+
+// Setting up time numerator input
+const timeNumeratorInput = document.getElementById('tempo-numerator')
+timeNumeratorInput.addEventListener('keydown', function(e){
+    if(e.keyCode === 13){
+        if(Number(timeNumeratorInput.value) <= 8) timeNumerator = Number(timeNumeratorInput.value)
+        else timeNumeratorInput.value = timeNumerator
+        timeNumeratorInput.placeholder = timeNumerator
+    }
+    
+})
+// Setting up time denominator input
+const timeDenominatorInput = document.getElementById('tempo-denominator')
+timeDenominatorInput.addEventListener('keydown', function(e){
+    if(e.keyCode === 13){
+        if(Number(timeDenominatorInput.value) <= 16) timeDenominator = Number(timeDenominatorInput.value)
+        else timeDenominatorInput.value = timeDenominator
+        timeDenominatorInput.placeholder = timeDenominator
+    }
+})
 
 WebMidi.enable(function (err) {
     // Adds inputs to the dropdown menu when new ports connect
@@ -152,4 +161,88 @@ function sendNote(beat){
                 }
         })
     }
+}
+
+function makeClientLayout(clientId, name){
+    const clientContainer = document.createElement('div')
+    clientContainer.className = 'client-instance-container'
+    clientContainer.id = clientId + '-container'
+    
+    // Top bar
+    const bar = document.createElement('div')
+    bar.className = 'top-bar'
+
+    const barTitle = document.createElement('div')
+    barTitle.className = 'top-bar-title'
+
+    barTitleText = document.createElement('p')
+    barTitleText.innerHTML = name
+
+    barTitle.appendChild(barTitleText)
+    bar.appendChild(barTitle)
+
+    const barIcons = document.createElement('div')
+    barIcons.className = 'top-bar-icons'
+
+    const minimizeIcon = document.createElement('div')
+    minimizeIcon.className = 'minimize-icon-js'
+
+    const minimizeImg = document.createElement('img')
+    minimizeImg.src = 'assets/icons/minimize-btn.png'
+
+    minimizeIcon.appendChild(minimizeImg)
+    barIcons.appendChild(minimizeIcon)
+
+    const fullscreenIcon = document.createElement('div')
+    fullscreenIcon.className = 'full-screen-icon-js'
+
+    const fullscreenImg = document.createElement('img')
+    fullscreenImg.src = 'assets/icons/full-screen-btn.png'
+
+    fullscreenIcon.appendChild(fullscreenImg)
+    barIcons.appendChild(fullscreenIcon)
+
+    const closeIcon = document.createElement('div')
+    closeIcon.className = 'close-icon-js'
+
+    const closeImg = document.createElement('img')
+    closeImg.src = 'assets/icons/close-btn.png'
+
+    closeIcon.appendChild(closeImg)
+    barIcons.appendChild(closeIcon)
+
+    bar.appendChild(barIcons)
+
+    // Client content
+    const clientContent = document.createElement('div')
+    clientContent.className = 'client-instance-content'
+
+    const clientCanvas = document.createElement('div')
+    clientCanvas.className = 'client-instance-canvas-wrapper'
+    clientCanvas.id = clientId + '-canvas-wrapper'
+
+    clientContent.appendChild(clientCanvas)
+
+    const clientMenu = document.createElement('div')
+    clientMenu.className = 'client-instance-side-menu'
+
+    const midiChannel = document.createElement('div')
+    midiChannel.className = 'client-instance-midi-channel'
+
+    const dropdown = document.createElement('select')
+    dropdown.className = 'dropdown-menu'
+
+    const option = document.createElement('option')
+    option.text = 'Ch. #1'
+
+    dropdown.appendChild(option)
+
+    midiChannel.appendChild(dropdown)
+    clientMenu.appendChild(midiChannel)
+    clientContent.appendChild(clientMenu)
+
+    //===== 
+    clientContainer.appendChild(bar)
+    clientContainer.appendChild(clientContent)
+    document.body.appendChild(clientContainer)
 }
