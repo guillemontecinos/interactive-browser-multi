@@ -2,20 +2,30 @@
 // by Guillermo Montecinos
 
 // Source: https://socket.io/docs/#Using-with-Express
-// TODO: update this address with the current IP
 let url = location.host.split(':')[0]
-let socket = io.connect(url)
+const socket = io.connect(url)
 socket.emit('nickname', 'admin')
 
 let clients = []
+let channels = []
+for (let i = 0; i < 16; i++){
+    channels.push({channel: i + 1, inUse: false, userID: ''})
+}
 
 socket.on('new client to admin', function(data){
     console.log(data)
-    // create a div that stores the canvas
     // saves the data in the clients array
     // TODO: channel has to be setup based on the user's decision, this is just for testing
     makeClientLayout(data.id, data.username)
-    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: clients.length + 1})
+    let midiCh
+    for (let i = 0; i < channels.length; i++){
+        if(channels[i].inUse == false){
+            midiCh = channels[i].channel
+            channels[i].inUse = true
+            break
+        }
+    }
+    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: midiCh})
 })
 
 socket.on('disconnect to admin', function(data){
@@ -50,7 +60,6 @@ function pointReceived(element, data){
 
 function resetClient(element){
     element.instance.background(255)
-    element.instance.rect(0, 0, element.instance.width, element.instance.height)
     element.shape = []
 }
 
@@ -89,37 +98,69 @@ timeDenominatorInput.addEventListener('keydown', function(e){
 })
 
 WebMidi.enable(function (err) {
+    // Selects input by using the dropdown menu
+    let input
+    const dropdownMenu = document.getElementById('midi-port-dropdown')
+    dropdownMenu.addEventListener('change', () => {
+        // Clear listeners of the previuous input
+        if (input) {
+            input.removeListener()
+        }
+        if(WebMidi.getInputByName(dropdownMenu.value).connection == 'open'){
+            input = WebMidi.getInputByName(dropdownMenu.value)
+            setMidiListeners(input)
+        }
+    })
+
     // Adds inputs to the dropdown menu when new ports connect
     WebMidi.addListener('connected', (e) => {
-        
-        // if (e.port.type == 'input' && !document.getElementById(e.port.id)) {
+        if (e.port.type == 'input' && !document.getElementById(e.port.id)) {
             console.log(e.port.name + ' connected')
-        // }
-        if(WebMidi.getInputById(e.port.id)) return
-        
-        WebMidi.getInputByName('auxVirtualPort Bus 1').addListener('start', 'all', (e) => {
-            console.log('bar: 1')
-            sendNote(1)
-        })
-        WebMidi.getInputByName('auxVirtualPort Bus 1').addListener('stop', 'all', (e) => {
-            console.log(e)
-            ppqnCount = 0
-            barCount = 1
-        })
-        WebMidi.getInputByName('auxVirtualPort Bus 1').addListener('clock', 'all', (e) => {
-            ppqnCount++
-            const ppqnComparator = 24 * 4 / timeDenominator
-            if(ppqnCount == 0 || ppqnCount == ppqnComparator){
-                ppqnCount = 0
-                barCount++
-                if(barCount == timeNumerator + 1) barCount = 1
-                console.log('bar: ' + barCount)
-                // calculate and send notes
-                sendNote(barCount)
+            const option = document.createElement('option')
+            option.id = e.port.id
+            option.text = e.port.name
+            document.getElementById('midi-port-dropdown').add(option)
+            // set callbacks only for first input por connected
+            if(document.getElementById('midi-port-dropdown').options.length == 1){
+                setMidiListeners(WebMidi.getInputById(e.port.id))
             }
-        })
+        }
+    })
+
+    // Removes inputs to the dropdown menu when ports gets disconnected
+    WebMidi.addListener('disconnected', (e) => {
+        console.log(e.port.name + ' disconnected')
+        if (e.port.type == 'input') {
+            let option = document.getElementById(e.port.id)
+            option.remove()
+        }
     })
 })
+
+function setMidiListeners(input){
+    console.log('MIDI listeners added to "' + input.name + '"')
+    input.addListener('start', 'all', (e) => {
+        console.log('bar: 1')
+        sendNote(1)
+    })
+    input.addListener('stop', 'all', (e) => {
+        console.log(e)
+        ppqnCount = 0
+        barCount = 1
+    })
+    input.addListener('clock', 'all', (e) => {
+        ppqnCount++
+        const ppqnComparator = 24 * 4 / timeDenominator
+        if(ppqnCount == 0 || ppqnCount == ppqnComparator){
+            ppqnCount = 0
+            barCount++
+            if(barCount == timeNumerator + 1) barCount = 1
+            console.log('bar: ' + barCount)
+            // calculate and send notes
+            sendNote(barCount)
+        }
+    })
+}
 
 function sendNote(beat){
     if(clients.length > 0){
@@ -163,6 +204,7 @@ function sendNote(beat){
     }
 }
 
+// Layout Section
 function makeClientLayout(clientId, name){
     const clientContainer = document.createElement('div')
     clientContainer.className = 'client-instance-container'
