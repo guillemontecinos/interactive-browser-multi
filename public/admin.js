@@ -16,24 +16,29 @@ socket.on('new client to admin', function(data){
     console.log(data)
     // saves the data in the clients array
     // TODO: channel has to be setup based on the user's decision, this is just for testing
-    makeClientLayout(data.id, data.username)
     let midiCh
     for (let i = 0; i < channels.length; i++){
         if(channels[i].inUse == false){
             midiCh = channels[i].channel
             channels[i].inUse = true
+            channels[i].userID = data.id
             break
         }
     }
+    makeClientLayout(data.id, data.username)
     clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: midiCh})
 })
 
 socket.on('disconnect to admin', function(data){
     // get rid of the container
     document.getElementById(data.id + '-container').remove()
+    const channelIndex = channels.findIndex(channel => channel.userID === data.id)
+    channels[channelIndex].inUse = false
+    channels[channelIndex].userID = ''
     // remove client from the clients array
     let index = clients.findIndex(element => element.id === data.id)
     clients.splice(index, 1)
+    updateMIDIChannels()
 })
 
 socket.on('data to admin', function(data){
@@ -67,6 +72,7 @@ function resetClient(element){
 const s = function(sketch){
     sketch.setup = function(){
         sketch.createCanvas(document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientWidth, document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientHeight)
+        sketch.background(255)
         sketch.strokeWeight(3)
     }
 }
@@ -273,11 +279,42 @@ function makeClientLayout(clientId, name){
 
     const dropdown = document.createElement('select')
     dropdown.className = 'dropdown-menu'
+    dropdown.id = clientId + '-dropdown'
+    // create options based on channels array
+    channels.forEach(channel => {
+        if(channel.inUse == false) {
+            const option = document.createElement('option')
+            option.text = 'Ch. #' + channel.channel
+            option.value = channel.channel
+            dropdown.appendChild(option)
+        }
+        else if(channel.inUse == true && channel.userID === clientId){
+            const option = document.createElement('option')
+            option.text = 'Ch. #' + channel.channel
+            option.value = channel.channel
+            option.selected = true
+            dropdown.appendChild(option)
+        }
+    })
 
-    const option = document.createElement('option')
-    option.text = 'Ch. #1'
-
-    dropdown.appendChild(option)
+    dropdown.addEventListener('change', function(){
+        // update channel in client object
+        const clientIndex = clients.findIndex(client => client.id === clientId)
+        const channelIndex = channels.findIndex(channel => channel.userID === clientId)
+        const thisChannel = this.value
+        // update old channel
+        channels[channelIndex].inUse = false
+        channels[channelIndex].userID = ''
+        // update new channel
+        clients[clientIndex].channel = thisChannel
+        channels[Number(thisChannel - 1)].inUse = true
+        channels[Number(thisChannel - 1)].userID = clientId
+        
+        // console.log(clients[clientIndex].username + ' is using MIDI Channel #' + thisChannel)
+        
+        // update all clients channels
+        updateMIDIChannels()
+    })
 
     midiChannel.appendChild(dropdown)
     clientMenu.appendChild(midiChannel)
@@ -287,4 +324,26 @@ function makeClientLayout(clientId, name){
     clientContainer.appendChild(bar)
     clientContainer.appendChild(clientContent)
     document.body.appendChild(clientContainer)
+}
+
+function updateMIDIChannels(){
+    clients.forEach(client => {
+        const dropdownMenu = document.getElementById(client.id + '-dropdown')
+        dropdownMenu.options.length = 0
+        channels.forEach(channel => {
+            if(channel.inUse == false) {
+                const option = document.createElement('option')
+                option.text = 'Ch. #' + channel.channel
+                option.value = channel.channel
+                dropdownMenu.appendChild(option)
+            }
+            else if(channel.inUse == true && channel.userID === client.id){
+                const option = document.createElement('option')
+                option.text = 'Ch. #' + channel.channel
+                option.value = channel.channel
+                option.selected = true
+                dropdownMenu.appendChild(option)
+            }
+        })
+    })
 }
