@@ -1,18 +1,21 @@
 const express = require('express')
 const path = require('path')
-const url = require('url')
 
 // Instantiate express app
 const app = express()
 
-const server = require('http').Server(app)
+const server = require('http').createServer(app)
+
+// HTTP framework for socket
+const port = process.env.PORT || 3000
+server.listen(port, function(){
+    console.log('Interactive browser Multiuser v1 listening on port ' + port)
+})
+
+// TODO: solve CORS block to client's connection since socket.io v3 is used
 const io = require('socket.io')(server)
 
 let clients = [], adimConnected = false
-
-// HTTP framework for socket
-const httpPort = 80
-server.listen(httpPort)
 
 app.use(express.static('public'))
 
@@ -38,7 +41,6 @@ io.on('connection', function (socket){
 
     socket.on('client interacted', function (data){
         // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y + 'action: ' + data.action)
-        // socket.broadcast.emit('data to admin', data)
         socket.broadcast.emit('data to admin', {id: socket.id, username: socket.username, x: data.x, y: data.y, action: data.action})
     })
 
@@ -50,8 +52,4 @@ io.on('connection', function (socket){
         let index = clients.findIndex(element => element.id === socket.id)
         clients.splice(index, 1)
     })
-})
-
-app.listen(3000, function (){
-    console.log('Interactive browser Multiuser v1 listening on port 3000')
 })

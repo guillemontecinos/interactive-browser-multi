@@ -4,7 +4,8 @@
 // Source: https://socket.io/docs/#Using-with-Express
 // TODO: update this address with the current IP
 
-let socket, name = '', input, button, onInterface = false, curves = {shape: []}, clearBtn
+const socket = io()
+let input, button, onInterface = false, curves = {shape: []}, clearBtn
 
 function setup(){
     input = document.getElementById('username-value')
@@ -14,23 +15,19 @@ function setup(){
 
 function buttonSubmit(){
     if(input.value == '') return
-    name = input.value
-
-    let url = location.host.split(':')[0]
-
-    socket = io.connect(url)
-    socket.emit('nickname', name)
+    const username = input.value
+    socket.emit('nickname', username)
 
     document.getElementById('client-welcome-alert').remove()
     document.getElementById('client-draw-container').style.display = 'block'
-    document.getElementById('top-bar-title-p').innerHTML = 'Interactive Browser Experience – ' + name
+    document.getElementById('top-bar-title-p').innerHTML = 'Interactive Browser Experience – ' + username
 
     const clientWrap = document.getElementById('client-canvas-wrapper')
     const cnv = createCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
-    console.log(cnv)
     clientWrap.appendChild(canvas)
     background(255)
-    strokeWeight(5)
+    // Assuming we are covering only one octave
+    strokeWeight(height / 12)
 
     clearBtn = document.getElementById('clear-btn')
     clearBtn.addEventListener('click', clearCurves)

@@ -3,7 +3,8 @@
 
 // Source: https://socket.io/docs/#Using-with-Express
 let url = location.host.split(':')[0]
-const socket = io.connect(url)
+console.log('url: ' + url)
+const socket = io()
 socket.emit('nickname', 'admin')
 
 let clients = []
@@ -73,7 +74,8 @@ const s = function(sketch){
     sketch.setup = function(){
         sketch.createCanvas(document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientWidth, document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientHeight)
         sketch.background(255)
-        sketch.strokeWeight(3)
+        // sketch.strokeWeight(3)
+        sketch.strokeWeight(sketch.height / 12)
     }
 }
 
@@ -197,7 +199,7 @@ function sendNote(beat){
                 const vel = element.instance.map(brightness, 0, 255, 1, 0)
                 if(vel > .3){
                     // Send note when avg is higher than some threshold
-                    WebMidi.getOutputByName('auxVirtualPort Bus 1').playNote(
+                    WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
                         60 + numNotes - i, 
                         element.channel, 
                         {
