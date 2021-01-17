@@ -84,6 +84,8 @@ let ppqnCount = 0
 let barCount = 1
 let octaves = 1
 let timeNumerator = 4, timeDenominator = 4
+// Multiplies the time denominator in order to augment the number of notes that divide the 1/4 note. Can only take 1, 2 or 4 as values
+let timeResolution = 4
 
 // Setting up time numerator input
 const timeNumeratorInput = document.getElementById('tempo-numerator')
@@ -158,10 +160,10 @@ function setMidiListeners(input){
     })
     input.addListener('clock', 'all', (e) => {
         ppqnCount++
-        const ppqnComparator = 24 * 4 / timeDenominator
+        const ppqnComparator = 24 * 4 / (timeDenominator * timeResolution)
         if(ppqnCount == 0 || ppqnCount == ppqnComparator){
             ppqnCount = 0
-            barCount++
+            barCount += 1 / timeResolution
             if(barCount == timeNumerator + 1) barCount = 1
             console.log('bar: ' + barCount)
             // calculate and send notes
@@ -203,7 +205,7 @@ function sendNote(beat){
                         60 + numNotes - i, 
                         element.channel, 
                         {
-                            duration: 20, 
+                            duration: 50, 
                             velocity: vel
                         })
                     }
