@@ -85,7 +85,7 @@ let barCount = 1
 let octaves = 1
 let timeNumerator = 4, timeDenominator = 4
 // Multiplies the time denominator in order to augment the number of notes that divide the 1/4 note. Can only take 1, 2 or 4 as values
-let timeResolution = 4
+let timeResolution = 1
 
 // Setting up time numerator input
 const timeNumeratorInput = document.getElementById('tempo-numerator')
@@ -105,6 +105,12 @@ timeDenominatorInput.addEventListener('keydown', function(e){
         else timeDenominatorInput.value = timeDenominator
         timeDenominatorInput.placeholder = timeDenominator
     }
+})
+
+// Setting up time resolution dropdown
+const timeResolutionInput = document.getElementById('time-resolution-dropdown')
+timeResolutionInput.addEventListener('change', () => {
+    timeResolution = Number(timeResolutionInput.value)
 })
 
 WebMidi.enable(function (err) {

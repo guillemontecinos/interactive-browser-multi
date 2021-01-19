@@ -255,6 +255,23 @@ body {
   border: 2px solid black;
 }
 
+.admin-menu .time-resolution {
+  display: inline-block;
+  width: 160px;
+  height: 35px;
+  margin: 4px;
+  float: right;
+}
+
+.admin-menu .time-resolution select {
+  width: 100%;
+  height: 100%;
+  font-family: 'Ubuntu Mono';
+  font-size: large;
+  background: #C4C4C4;
+  border: 2px solid black;
+}
+
 .admin-menu .tempo-submit {
   width: 100px;
   height: 31px;
