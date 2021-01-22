@@ -5,12 +5,45 @@
 // TODO: update this address with the current IP
 
 const socket = io()
-let input, button, onInterface = false, curves = {shape: []}, clearBtn
+let input, button, onInterface = false, curves = {shape: []}, clearBtn, adminConnected = false
+
+// Admin connected checker
+socket.on('adming status', (data) => {
+    console.log('Admin status: ' + data.status)
+    adminConnected = data.status
+})
+
+socket.on('admin connected', (data) => {
+    if(!adminConnected && data.status) {
+        adminConnected = data.status
+        console.log('Admin status: ' + data.status)
+        adminConnects()
+    }
+})
+
+socket.on('admin disconnected', (data) => {
+    // use when admin disconnects in the middle of something
+})
 
 function setup(){
     input = document.getElementById('username-value')
     button = document.getElementById('username-submit')
     button.addEventListener('click', buttonSubmit)
+    input.style.visibility = 'hidden'
+    button.style.visibility = 'hidden'
+    
+    if(adminConnected){
+        adminConnects()
+    }
+    else {
+        document.getElementById('ui-message').innerHTML = 'The admin is not connected yet, please wait.'
+    }
+}
+
+function adminConnects(){
+    input.style.visibility = 'visible'
+    button.style.visibility = 'visible'
+    document.getElementById('ui-message').innerHTML = 'In this experience you will be remotely collaborating with a sound performance with your drawings. To start interacting create your username and click start.'
 }
 
 function buttonSubmit(){
@@ -39,7 +72,7 @@ function buttonSubmit(){
 function mousePressed(){
     if(onInterface && mouseX <= width && mouseY <= height){
         let pos = curveStart()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'start'}) 
+        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'start'})
     }
 }
 
