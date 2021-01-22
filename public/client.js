@@ -84,7 +84,10 @@ function mouseDragged(){
 }
 
 function mouseReleased(){
-    // don't do anything
+    if(onInterface && mouseX <= width && mouseY <= height){
+        let pos = curveDuring()
+        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+    }
 }
 
 // Touch events for mobile devices
@@ -105,6 +108,10 @@ function touchMoved(){
 }
 
 function touchEnded(){
+    if(onInterface && mouseX <= width && mouseY <= height){
+        let pos = curveDuring()
+        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+    }
     // return false
 }
 

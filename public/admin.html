@@ -11,6 +11,36 @@
     <script src="https://cdn.jsdelivr.net/npm/webmidi"></script>
 </head>
 <body>
+    <div class="client-welcome-alert" id="client-welcome-alert">
+        <div class="top-bar">
+            <div class="top-bar-title">
+                <p>Welcome to the Interactive Browser</p>
+            </div>
+            <div class="top-bar-icons">
+                <div class="minimize-icon">
+                    <img src="assets/icons/minimize-btn.png">
+                </div>
+                <div class="full-screen-icon">
+                    <img src="assets/icons/full-screen-btn.png">
+                </div>
+                <div class="close-icon">
+                    <img src="assets/icons/close-btn.png">
+                </div>
+            </div>
+        </div>
+        <div class="message">
+            <p id="ui-message">
+                Hi Admin!<br><br>
+                Please insert your password to sign in:
+            </p>
+        </div>
+        <div class="input-value">
+            <input type="text" id="username-value">
+        </div>
+        <div class="input-submit">
+            <button id="username-submit">Submit</button>
+        </div>
+    </div>
     <div class="admin-menu">
         <div class="midi-port">
             <select class="midi-port-dropdown" id="midi-port-dropdown">

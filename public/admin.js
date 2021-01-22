@@ -2,11 +2,25 @@
 // by Guillermo Montecinos
 
 // Source: https://socket.io/docs/#Using-with-Express
+let signedIn = false
 let url = location.host.split(':')[0]
 console.log('url: ' + url)
 const socket = io()
-socket.emit('nickname', 'admin')
 
+// Welcome alert, waiting for admin to input password
+const input = document.getElementById('username-value')
+const button = document.getElementById('username-submit')
+
+button.addEventListener('click', function(){
+    // TODO: make security check safer
+    if(input.value == '123'){
+        signedIn = true
+        document.getElementById('client-welcome-alert').remove()
+        socket.emit('nickname', 'admin')
+    }
+})
+
+// Main code after this
 let clients = []
 let channels = []
 for (let i = 0; i < 16; i++){
