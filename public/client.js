@@ -8,9 +8,10 @@ const socket = io()
 let input, button, onInterface = false, curves = {shape: []}, clearBtn, adminConnected = false
 
 // Admin connected checker
-socket.on('adming status', (data) => {
+socket.on('admin status', (data) => {
     console.log('Admin status: ' + data.status)
     adminConnected = data.status
+    if(adminConnected) adminConnects()
 })
 
 socket.on('admin connected', (data) => {

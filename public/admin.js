@@ -27,7 +27,7 @@ for (let i = 0; i < 16; i++){
     channels.push({channel: i + 1, inUse: false, userID: ''})
 }
 
-socket.on('new client to admin', function(data){
+socket.on('new client', function(data){
     console.log(data)
     // saves the data in the clients array
     // TODO: channel has to be setup based on the user's decision, this is just for testing
@@ -44,7 +44,7 @@ socket.on('new client to admin', function(data){
     clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: midiCh})
 })
 
-socket.on('disconnect to admin', function(data){
+socket.on('client disconnects', function(data){
     // get rid of the container
     document.getElementById(data.id + '-container').remove()
     const channelIndex = channels.findIndex(channel => channel.userID === data.id)
@@ -56,7 +56,7 @@ socket.on('disconnect to admin', function(data){
     updateMIDIChannels()
 })
 
-socket.on('data to admin', function(data){
+socket.on('new data', function(data){
     let index = clients.findIndex(element => element.id === data.id)
     // update circle position of the client
     // console.log(clients[index].shape)

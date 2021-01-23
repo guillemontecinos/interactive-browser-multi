@@ -29,6 +29,10 @@ app.get('/admin', function (req, res){
     else res.sendFile(path.join(__dirname, '/public/client.html'))
 })
 
+app.get('/viewer', function (req, res){
+    res.sendFile(path.join(__dirname, '/public/viewer.html'))
+})
+
 // Socket events
 io.on('connection', function (socket){
     
@@ -40,14 +44,31 @@ io.on('connection', function (socket){
             adminConnected = true
             socket.broadcast.emit('admin connected', {status: adminConnected})
         } 
-        else socket.broadcast.emit('new client to admin', {id: socket.id, username: socket.username})
-        clients.push({id: socket.id, username: data})
+        else if(data == 'viewer') {
+            socket.emit('initial data to viewer', clients)
+        }
+        else socket.broadcast.emit('new client', {id: socket.id, username: socket.username})
+        clients.push({id: socket.id, username: data, shape: []})
         console.log(socket.username + ' connected')
     })
 
     socket.on('client interacted', function (data){
         // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y + 'action: ' + data.action)
-        socket.broadcast.emit('data to admin', {id: socket.id, username: socket.username, x: data.x, y: data.y, action: data.action})
+        socket.broadcast.emit('new data', {id: socket.id, username: socket.username, x: data.x, y: data.y, action: data.action})
+        // check what client is sending data
+        const index = clients.findIndex(element => element.id === socket.id)
+        // push path to client
+        if(data.action == 'start'){
+            clients[index].shape.push([])
+            clients[index].shape[clients[index].shape.length - 1].push({x: data.x, y: data.y})
+        }
+        else if(data.action == 'dragged'){
+            clients[index].shape[clients[index].shape.length - 1].push({x: data.x, y: data.y})
+        }
+        else if(data.action == 'reset'){
+            clients[index].shape = []
+        }
+        // console.log(clients)
     })
 
     socket.on('disconnect', function(){
@@ -55,10 +76,10 @@ io.on('connection', function (socket){
             adminConnected = false
             socket.broadcast.emit('admin disconnected', {status: adminConnected})
         } 
-        socket.broadcast.emit('disconnect to admin', {id: socket.id})
+        socket.broadcast.emit('client disconnects', {id: socket.id})
         console.log(socket.username + ' disconnected')
         // find the element's position within clients and remove it
-        let index = clients.findIndex(element => element.id === socket.id)
+        const index = clients.findIndex(element => element.id === socket.id)
         clients.splice(index, 1)
     })
 })
