@@ -200,36 +200,55 @@ function sendNote(beat){
             const noteWidth = element.instance.int(element.instance.width / timeNumerator)
             const noteHeight = element.instance.int(element.instance.height / numNotes)
             
-            // element.instance.fill(255,0,0,50)
-            // element.instance.noStroke()
-            // element.instance.rect((beat - 1) * noteWidth, 0, noteWidth, element.instance.height)
-
-            element.instance.loadPixels()
+            // Iterate over each note of the scale
             for (let i = 0; i < numNotes; i++){
-                // Estimate pixelsDensity
-                let counter = 0, brightness = 0
-                for(let x = (beat - 1) * noteWidth; x < beat * noteWidth; x += 4){
-                    if(x > element.instance.width) break
-                    for(let y = i * noteHeight; y < (i + 1) * noteHeight; y += 4){
-                        if(y > element.instance.height) break
-                        const c = element.instance.get(x, y)
-                        brightness += (element.instance.red(c) + element.instance.green(c) + element.instance.blue(c)) / 3
-                        counter++
-                    }
-                }
-                brightness /= counter
-                const vel = element.instance.map(brightness, 0, 255, 1, 0)
-                if(vel > .3){
+                let vertexCount = 0
+                const noteArea = {x1: (beat - 1) / timeNumerator, y1: i / numNotes, x2: beat / timeNumerator, y2: (i + 1) / numNotes}
+                element.shape.forEach(curve => {
+                    curve.forEach((vertex) => {
+                        if(vertex.x >= noteArea.x1 && vertex.x <= noteArea.x2 && vertex.y >= noteArea.y1 && vertex.y <= noteArea.y2) vertexCount++
+                    })
+                })
+                if(vertexCount >= 1) {
                     // Send note when avg is higher than some threshold
                     WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
                         60 + numNotes - i, 
                         element.channel, 
                         {
                             duration: 50, 
-                            velocity: vel
+                            velocity: 100
                         })
-                    }
                 }
+            }
+
+            // ========== Send notes calculated by brightness average ==========
+            // element.instance.loadPixels()
+            // for (let i = 0; i < numNotes; i++){
+            //     // Estimate pixelsDensity
+            //     let counter = 0, brightness = 0
+            //     for(let x = (beat - 1) * noteWidth; x < beat * noteWidth; x += 4){
+            //         if(x > element.instance.width) break
+            //         for(let y = i * noteHeight; y < (i + 1) * noteHeight; y += 4){
+            //             if(y > element.instance.height) break
+            //             const c = element.instance.get(x, y)
+            //             brightness += (element.instance.red(c) + element.instance.green(c) + element.instance.blue(c)) / 3
+            //             counter++
+            //         }
+            //     }
+            //     brightness /= counter
+            //     const vel = element.instance.map(brightness, 0, 255, 1, 0)
+            //     if(vel > .3){
+            //         // Send note when avg is higher than some threshold
+            //         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
+            //             60 + numNotes - i, 
+            //             element.channel, 
+            //             {
+            //                 duration: 50, 
+            //                 velocity: vel
+            //             })
+            //     }
+            // }
+            // ========== Send notes calculated by brightness average ==========
         })
     }
 }
