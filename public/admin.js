@@ -29,6 +29,8 @@ for (let i = 0; i < 16; i++){
 
 socket.on('new client', function(data){
     console.log(data)
+    // send current playing status to client
+    if(isPlaying) socket.emit('admin-playing-on-connection', {id: data.id, timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution, numNotes: numNotes})
     // saves the data in the clients array
     // TODO: channel has to be setup based on the user's decision, this is just for testing
     let midiCh
@@ -99,6 +101,7 @@ let barCount = 1
 let octaves = 1
 let numNotes = octaves * 12
 let timeNumerator = 4, timeDenominator = 4
+let isPlaying = false
 // Multiplies the time denominator in order to augment the number of notes that divide the 1/4 note. Can only take 1, 2 or 4 as values
 let timeResolution = 1
 
@@ -173,11 +176,15 @@ function setMidiListeners(input){
     input.addListener('start', 'all', (e) => {
         console.log('bar: 1')
         sendNote(1)
+        isPlaying = true
+        socket.emit('admin-play', {status : 'play', timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution, numNotes: numNotes})
     })
     input.addListener('stop', 'all', (e) => {
         console.log(e)
         ppqnCount = 0
         barCount = 1
+        isPlaying = false
+        socket.emit('admin-play', {status : 'stop'})
     })
     input.addListener('clock', 'all', (e) => {
         ppqnCount++
@@ -190,6 +197,7 @@ function setMidiListeners(input){
             // calculate and send notes
             sendNote(barCount)
         }
+        socket.emit('admin-clock', {})
     })
 }
 
@@ -209,7 +217,7 @@ function sendNote(beat){
                         if(vertex.x >= noteArea.x1 && vertex.x <= noteArea.x2 && vertex.y >= noteArea.y1 && vertex.y <= noteArea.y2) vertexCount++
                     })
                 })
-                // when detecting a note
+                // when detecting a note send note on
                 if(vertexCount >= 1) {
                     // on other beats just compare
                     if(beat == 1 || element.previousNotes[i] == false) {
@@ -224,7 +232,7 @@ function sendNote(beat){
                     }
                     element.previousNotes[i] = true
                 }
-                // when detecting no note
+                // when detecting no note send note off
                 else{
                     if(beat == 1 || element.previousNotes[i] == true) {
                         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).stopNote(

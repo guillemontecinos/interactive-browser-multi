@@ -82,4 +82,16 @@ io.on('connection', function (socket){
         const index = clients.findIndex(element => element.id === socket.id)
         clients.splice(index, 1)
     })
+
+    socket.on('admin-play', function(data){
+        socket.broadcast.emit('client-play', data)
+    })
+
+    socket.on('admin-clock', function(data){
+        socket.broadcast.emit('client-clock', data)
+    })
+
+    socket.on('admin-playing-on-connection', function(data){
+        socket.broadcast.emit('client-play-on-connection', data)
+    })
 })
