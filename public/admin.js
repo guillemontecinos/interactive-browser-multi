@@ -41,7 +41,7 @@ socket.on('new client', function(data){
         }
     }
     makeClientLayout(data.id, data.username)
-    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: midiCh})
+    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: midiCh, previousNotes: new Array(numNotes).fill(false)})
 })
 
 socket.on('client disconnects', function(data){
@@ -97,6 +97,7 @@ const s = function(sketch){
 let ppqnCount = 0
 let barCount = 1
 let octaves = 1
+let numNotes = octaves * 12
 let timeNumerator = 4, timeDenominator = 4
 // Multiplies the time denominator in order to augment the number of notes that divide the 1/4 note. Can only take 1, 2 or 4 as values
 let timeResolution = 1
@@ -196,7 +197,6 @@ function sendNote(beat){
     if(clients.length > 0){
         clients.forEach(element => {
             // TODO: implemente sending each user to a different channel
-            const numNotes = octaves * 12
             const noteWidth = element.instance.int(element.instance.width / timeNumerator)
             const noteHeight = element.instance.int(element.instance.height / numNotes)
             
@@ -209,15 +209,33 @@ function sendNote(beat){
                         if(vertex.x >= noteArea.x1 && vertex.x <= noteArea.x2 && vertex.y >= noteArea.y1 && vertex.y <= noteArea.y2) vertexCount++
                     })
                 })
+                // when detecting a note
                 if(vertexCount >= 1) {
-                    // Send note when avg is higher than some threshold
-                    WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
-                        60 + numNotes - i, 
-                        element.channel, 
-                        {
-                            duration: 50, 
-                            velocity: 100
-                        })
+                    // on other beats just compare
+                    if(beat == 1 || element.previousNotes[i] == false) {
+                        // Send note when avg is higher than some threshold
+                        WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
+                            60 + numNotes - i, 
+                            element.channel, 
+                            {
+                                duration: 5000, 
+                                velocity: 100
+                            })
+                    }
+                    element.previousNotes[i] = true
+                }
+                // when detecting no note
+                else{
+                    if(beat == 1 || element.previousNotes[i] == true) {
+                        WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).stopNote(
+                            60 + numNotes - i, 
+                            element.channel, 
+                            {
+                                time: 0, 
+                                velocity: 100
+                            })
+                    }
+                    element.previousNotes[i] = false
                 }
             }
 
