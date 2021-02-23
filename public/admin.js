@@ -75,7 +75,8 @@ socket.on('new data', function(data){
 })
 
 function pointReceived(element, data){
-    element.shape[element.shape.length - 1].push({x: data.x, y: data.y})
+    element.shape[element.shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
+    element.instance.strokeWeight(element.instance.height / data.stroke)
     let aux = element.shape[element.shape.length - 1]
     if(aux.length >= 2) element.instance.line(aux[aux.length - 2].x * element.instance.width, aux[aux.length - 2].y * element.instance.height, aux[aux.length - 1].x * element.instance.width, aux[aux.length - 1].y * element.instance.height)
 }
@@ -90,8 +91,6 @@ const s = function(sketch){
     sketch.setup = function(){
         sketch.createCanvas(document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientWidth, document.getElementsByClassName('client-instance-canvas-wrapper')[0].clientHeight)
         sketch.background(255)
-        // sketch.strokeWeight(3)
-        sketch.strokeWeight(sketch.height / 12)
     }
 }
 

@@ -6,6 +6,7 @@
 
 const socket = io()
 let input, button, onInterface = false, curves = {shape: []}, clearBtn, adminConnected = false
+// let btnStrk8, btnStrk10, btnStrk15, btnStrk20, btnStrk30 
 
 // Admin connected checker
 socket.on('admin status', (data) => {
@@ -101,6 +102,9 @@ function adminConnects(){
     document.getElementById('ui-message').innerHTML = 'In this experience you will be remotely collaborating with a sound performance with your drawings. To start interacting create your username and click start.'
 }
 
+let strokeFactor = 12
+const clientWrap = document.getElementById('client-canvas-wrapper')
+const strokeButtons = document.getElementsByClassName('stroke-btn')
 function buttonSubmit(){
     if(input.value == '') return
     const username = input.value
@@ -109,63 +113,67 @@ function buttonSubmit(){
     document.getElementById('client-welcome-alert').remove()
     document.getElementById('client-draw-container').style.display = 'block'
     document.getElementById('top-bar-title-p').innerHTML = 'Interactive Browser Experience – ' + username
-
-    const clientWrap = document.getElementById('client-canvas-wrapper')
-    const cnv = createCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
+ 
+    createCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
     clientWrap.appendChild(canvas)
     background(255)
-    // Assuming we are covering only one octave
-    strokeWeight(height / 12)
 
     clearBtn = document.getElementById('clear-btn')
     clearBtn.addEventListener('click', clearCurves)
 
+    for (let i = 0; i < strokeButtons.length; i++) {
+        strokeButtons[i].addEventListener('click', function() {
+            strokeFactor = Number(this.value)
+            console.log('strokeFactor: ' + strokeFactor)
+        })
+        strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
+    }
     onInterface = true
 }
 
 // Mouse moved event for desktop devices
 function mousePressed(){
-    if(onInterface && mouseX <= width && mouseY <= height){
+    if(onInterface && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         let pos = curveStart()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'start'})
+        socket.emit('client interacted', {x: pos.x, y: pos.y, stroke: strokeFactor, action: 'start'})
     }
 }
 
 function mouseDragged(){
-    if(onInterface && mouseX <= width && mouseY <= height){
+    if(onInterface && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         let pos = curveDuring()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+        socket.emit('client interacted', {x: pos.x, y: pos.y, stroke: strokeFactor, action: 'dragged'})
     }
 }
 
 function mouseReleased(){
-    if(onInterface && mouseX <= width && mouseY <= height){
+    if(onInterface && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         let pos = curveDuring()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+        socket.emit('client interacted', {x: pos.x, y: pos.y, stroke: strokeFactor, action: 'dragged'})
     }
 }
 
 // Touch events for mobile devices
 function touchStarted(){
-    if(onInterface && mouseX <= width && mouseY <= height){
+    if(onInterface && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         let pos = curveStart()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'start'})
+        socket.emit('client interacted', {x: pos.x, y: pos.y, stroke: strokeFactor, action: 'start'})
     }
     // return false
 }
 
 function touchMoved(){
-    if(onInterface && mouseX <= width && mouseY <= height){
+    if(onInterface && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         let pos = curveDuring()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+        socket.emit('client interacted', {x: pos.x, y: pos.y, stroke: strokeFactor, action: 'dragged'})
     }            
     return false
 }
 
 function touchEnded(){
-    if(onInterface && mouseX <= width && mouseY <= height){
+    if(onInterface && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         let pos = curveDuring()
-        socket.emit('client interacted', {x: pos.x, y: pos.y, action: 'dragged'})
+        socket.emit('client interacted', {x: pos.x, y: pos.y, stroke: strokeFactor, action: 'dragged'})
     }
     // return false
 }
@@ -179,21 +187,22 @@ function curveStart(){
 function curveDuring(){
     let x = constrain(map(mouseX, 0, width, 0, 1), 0, 1)
     let y = constrain(map(mouseY, 0, height, 0, 1), 0, 1)
-    // console.log('x: ' + x + ', y: ' + y)
-    curves.shape[curves.shape.length - 1].push({x: x, y: y})
+    curves.shape[curves.shape.length - 1].push({x: x, y: y, stroke: strokeFactor})
     drawCurve()
     return {x: x, y: y}
 }
 
 function drawCurve(){
     let aux = curves.shape[curves.shape.length - 1]
-    if(aux.length >= 2) line(aux[aux.length - 2].x * width, aux[aux.length - 2].y * height, aux[aux.length - 1].x * width, aux[aux.length - 1].y * height)
+    if(aux.length >= 2) {
+        strokeWeight(height / aux[aux.length - 2].stroke)
+        line(aux[aux.length - 2].x * width, aux[aux.length - 2].y * height, aux[aux.length - 1].x * width, aux[aux.length - 1].y * height)
+    }
 }
 
 function clearCurves(){
     curves = {shape: []}
     background(255)
-    // rect(0, 0, width, height)
     socket.emit('client interacted', {x: 0, y: 0, action: 'reset'})
     stopNotes()
 }
@@ -219,7 +228,6 @@ function playNote(beat){
             // on other beats just compare
             if(beat == 1 || previousNotes[i] == false) {
                 // play note
-                // console.log('play ' + 60 + numNotes - i)
                 let freq = Tone.Midi(60 + numNotes - i).toFrequency()
                 synth.triggerAttack(freq, Tone.now())
             }
@@ -229,7 +237,6 @@ function playNote(beat){
         else{
             if(beat == 1 || previousNotes[i] == true) {
                 // stop note
-                // console.log('release ' + 60 + numNotes - i)
                 let freq = Tone.Midi(60 + numNotes - i).toFrequency()
                 synth.triggerRelease(freq, Tone.now())
             }
@@ -242,5 +249,25 @@ function stopNotes(){
     for(let i = 0; i < numNotes; i++){
         let freq = Tone.Midi(60 + numNotes - i).toFrequency()
         synth.triggerRelease(freq, Tone.now())
+    }
+}
+
+window.addEventListener('resize', updateCanvasSize)
+
+function updateCanvasSize(){
+    resizeCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
+    background(255)
+    if(curves.shape.length >= 1){
+        curves.shape.forEach(aux => {
+            if(aux.length >= 2) {
+                for(let i = 1; i < aux.length; i++) {
+                    strokeWeight(height / aux[i].stroke)
+                    line(aux[i].x * width, aux[i].y * height, aux[i - 1].x * width, aux[i - 1].y * height)
+                }
+            }
+        })
+    }
+    for (let i = 0; i < strokeButtons.length; i++) {
+        strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
     }
 }

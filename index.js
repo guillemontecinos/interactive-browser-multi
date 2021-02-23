@@ -54,16 +54,16 @@ io.on('connection', function (socket){
 
     socket.on('client interacted', function (data){
         // console.log('user #' + socket.username + ' moved x: ' + data.x + ' y: ' + data.y + 'action: ' + data.action)
-        socket.broadcast.emit('new data', {id: socket.id, username: socket.username, x: data.x, y: data.y, action: data.action})
+        socket.broadcast.emit('new data', {id: socket.id, username: socket.username, x: data.x, y: data.y, stroke: data.stroke, action: data.action})
         // check what client is sending data
         const index = clients.findIndex(element => element.id === socket.id)
         // push path to client
         if(data.action == 'start'){
             clients[index].shape.push([])
-            clients[index].shape[clients[index].shape.length - 1].push({x: data.x, y: data.y})
+            clients[index].shape[clients[index].shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
         }
         else if(data.action == 'dragged'){
-            clients[index].shape[clients[index].shape.length - 1].push({x: data.x, y: data.y})
+            clients[index].shape[clients[index].shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
         }
         else if(data.action == 'reset'){
             clients[index].shape = []

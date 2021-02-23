@@ -46,7 +46,7 @@ socket.on('client disconnects', (data) => {
 })
 
 function pointReceived(element, data){
-    element.shape[element.shape.length - 1].push({x: data.x, y: data.y})
+    element.shape[element.shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
     let aux = element.shape[element.shape.length - 1]
 }
 
@@ -60,14 +60,14 @@ function preload(){
     font = loadFont('./assets/fonts/UbuntuMono-Bold.ttf')
 }
 
+const clientWrap = document.getElementById('viewer-canvas-wrapper')
 function setup(){
     document.getElementById('client-draw-container').style.display = 'block'
-    const clientWrap = document.getElementById('viewer-canvas-wrapper')
-    const cnv = createCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
+    createCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
     clientWrap.appendChild(canvas)
     background(255)
     stroke(0)
-    strokeWeight(height / 12)
+    // strokeWeight(height / 12)
     textFont(font)
     textSize(height / 18)
     colorMode(HSB)
@@ -83,6 +83,7 @@ function draw(){
             client.shape.forEach(aux => {
                 if(aux.length >= 2) {
                     for(let i = 1; i < aux.length; i++) {
+                        strokeWeight(height / aux[i].stroke)
                         line(aux[i].x * width, aux[i].y * height, aux[i - 1].x * width, aux[i - 1].y * height)
                     }
                 }
@@ -101,4 +102,11 @@ function draw(){
             text(client.username, textPos.x, textPos.y)
         }
     })
+}
+
+window.addEventListener('resize', updateCanvasSize)
+
+function updateCanvasSize(){
+    resizeCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
+    background(255)
 }
