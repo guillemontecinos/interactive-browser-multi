@@ -51,7 +51,6 @@ function pointReceived(element, data){
 }
 
 function resetClient(element){
-    element.instance.background(255)
     element.shape = []
 }
 
