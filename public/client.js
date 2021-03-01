@@ -6,7 +6,6 @@
 
 const socket = io()
 let input, button, onInterface = false, curves = {shape: []}, clearBtn, adminConnected = false
-// let btnStrk8, btnStrk10, btnStrk15, btnStrk20, btnStrk30 
 
 // Admin connected checker
 socket.on('admin status', (data) => {
@@ -102,7 +101,7 @@ function adminConnects(){
     document.getElementById('ui-message').innerHTML = 'In this experience you will be remotely collaborating with a sound performance with your drawings. To start interacting create your username and click start.'
 }
 
-let strokeFactor = 12
+let strokeFactor = 15
 const clientWrap = document.getElementById('client-canvas-wrapper')
 const strokeButtons = document.getElementsByClassName('stroke-btn')
 function buttonSubmit(){
@@ -208,7 +207,7 @@ function clearCurves(){
 }
 
 // Declare tone syntheziser
-const masterGain = new Tone.Gain(.25).toDestination()
+const masterGain = new Tone.Gain(0).toDestination()
 const synth = new Tone.PolySynth().connect(masterGain)
 synth.options.envelope.attack = 0.1,
 synth.options.envelope.release = 0.3

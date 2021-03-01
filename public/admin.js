@@ -200,6 +200,14 @@ function setMidiListeners(input){
     })
 }
 
+const stroke2velocity = {
+    8:120,
+    10:100,
+    15:80,
+    20:60,
+    30:40
+}
+
 function sendNote(beat){
     if(clients.length > 0){
         clients.forEach(element => {
@@ -210,14 +218,27 @@ function sendNote(beat){
             // Iterate over each note of the scale
             for (let i = 0; i < numNotes; i++){
                 let vertexCount = 0
+                let velocityMaxAverage = 0
                 const noteArea = {x1: (beat - 1) / timeNumerator, y1: i / numNotes, x2: beat / timeNumerator, y2: (i + 1) / numNotes}
                 element.shape.forEach(curve => {
                     curve.forEach((vertex) => {
-                        if(vertex.x >= noteArea.x1 && vertex.x <= noteArea.x2 && vertex.y >= noteArea.y1 && vertex.y <= noteArea.y2) vertexCount++
+                        if(vertex.x >= noteArea.x1 && vertex.x <= noteArea.x2 && vertex.y >= noteArea.y1 && vertex.y <= noteArea.y2) {
+                            vertexCount++
+                            velocityMaxAverage += Number(stroke2velocity[vertex.stroke])
+                        }
                     })
                 })
                 // when detecting a note send note on
                 if(vertexCount >= 1) {
+                    console.log('vertexCount: ' + vertexCount)
+                    velocityMaxAverage /= vertexCount
+                    console.log('velocityMax: ' + velocityMaxAverage)
+                    vertexCount = element.instance.map(vertexCount, 0, 70, .1, 10)
+                    console.log('vertexCount Mapped: ' + vertexCount)
+                    let velocityShare = element.instance.map(Math.log(vertexCount), Math.log(.1), Math.log(10), 0, 1)
+                    let velocity = element.instance.constrain(velocityShare * velocityMaxAverage, 0, 127)
+                    console.log('verlShare: ' + velocityShare)
+                    console.log('velocity: ' + velocity)
                     // on other beats just compare
                     if(beat == 1 || element.previousNotes[i] == false) {
                         // Send note when avg is higher than some threshold
@@ -226,7 +247,7 @@ function sendNote(beat){
                             element.channel, 
                             {
                                 duration: 5000, 
-                                velocity: 100
+                                velocity: velocity
                             })
                     }
                     element.previousNotes[i] = true
@@ -245,35 +266,6 @@ function sendNote(beat){
                     element.previousNotes[i] = false
                 }
             }
-
-            // ========== Send notes calculated by brightness average ==========
-            // element.instance.loadPixels()
-            // for (let i = 0; i < numNotes; i++){
-            //     // Estimate pixelsDensity
-            //     let counter = 0, brightness = 0
-            //     for(let x = (beat - 1) * noteWidth; x < beat * noteWidth; x += 4){
-            //         if(x > element.instance.width) break
-            //         for(let y = i * noteHeight; y < (i + 1) * noteHeight; y += 4){
-            //             if(y > element.instance.height) break
-            //             const c = element.instance.get(x, y)
-            //             brightness += (element.instance.red(c) + element.instance.green(c) + element.instance.blue(c)) / 3
-            //             counter++
-            //         }
-            //     }
-            //     brightness /= counter
-            //     const vel = element.instance.map(brightness, 0, 255, 1, 0)
-            //     if(vel > .3){
-            //         // Send note when avg is higher than some threshold
-            //         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
-            //             60 + numNotes - i, 
-            //             element.channel, 
-            //             {
-            //                 duration: 50, 
-            //                 velocity: vel
-            //             })
-            //     }
-            // }
-            // ========== Send notes calculated by brightness average ==========
         })
     }
 }
