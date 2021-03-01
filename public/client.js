@@ -125,8 +125,10 @@ function buttonSubmit(){
             strokeFactor = Number(this.value)
             console.log('strokeFactor: ' + strokeFactor)
         })
+        // strokeButtons[i].style.width = height / Number(strokeButtons[i].value) + 'px'
         strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
     }
+    document.getElementById('client-stroke-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
     onInterface = true
 }
 
@@ -207,7 +209,7 @@ function clearCurves(){
 }
 
 // Declare tone syntheziser
-const masterGain = new Tone.Gain(0).toDestination()
+const masterGain = new Tone.Gain(.25).toDestination()
 const synth = new Tone.PolySynth().connect(masterGain)
 synth.options.envelope.attack = 0.1,
 synth.options.envelope.release = 0.3
@@ -267,6 +269,8 @@ function updateCanvasSize(){
         })
     }
     for (let i = 0; i < strokeButtons.length; i++) {
+        // strokeButtons[i].style.width = height / Number(strokeButtons[i].value) + 'px'
         strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
     }
+    document.getElementById('client-stroke-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
 }

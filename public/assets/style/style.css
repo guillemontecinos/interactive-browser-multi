@@ -231,12 +231,26 @@ body {
 
 .client-draw-container .client-main .client-ui {
   display: inline-block;
-  width: 200px;
+  width: 20%;
   height: 100%;
+  vertical-align: top;
 }
 
-.client-draw-container .client-main .client-ui button {
-  width: 90%;
+.client-draw-container .client-main .client-ui .client-stroke-ui {
+  margin-left: 10px;
+  border: 2px solid black;
+}
+
+.client-draw-container .client-main .client-ui .client-stroke-ui button {
+  display: block;
+  aspect-ratio: 1;
+  border: none;
+  background: none;
+  margin: auto;
+}
+
+.client-draw-container .client-main .client-ui .client-stroke-ui button img {
+  text-align: center;
 }
 
 .client-draw-container .client-main .client-canvas-wrapper {

@@ -102,7 +102,7 @@ let numNotes = octaves * 12
 let timeNumerator = 4, timeDenominator = 4
 let isPlaying = false
 // Multiplies the time denominator in order to augment the number of notes that divide the 1/4 note. Can only take 1, 2 or 4 as values
-let timeResolution = 1
+let timeResolution = 4
 
 // Setting up time numerator input
 const timeNumeratorInput = document.getElementById('tempo-numerator')
@@ -125,10 +125,10 @@ timeDenominatorInput.addEventListener('keydown', function(e){
 })
 
 // Setting up time resolution dropdown
-const timeResolutionInput = document.getElementById('time-resolution-dropdown')
-timeResolutionInput.addEventListener('change', () => {
-    timeResolution = Number(timeResolutionInput.value)
-})
+// const timeResolutionInput = document.getElementById('time-resolution-dropdown')
+// timeResolutionInput.addEventListener('change', () => {
+//     timeResolution = Number(timeResolutionInput.value)
+// })
 
 WebMidi.enable(function (err) {
     // Selects input by using the dropdown menu
@@ -212,8 +212,8 @@ function sendNote(beat){
     if(clients.length > 0){
         clients.forEach(element => {
             // TODO: implemente sending each user to a different channel
-            const noteWidth = element.instance.int(element.instance.width / timeNumerator)
-            const noteHeight = element.instance.int(element.instance.height / numNotes)
+            // const noteWidth = element.instance.int(element.instance.width / timeNumerator)
+            // const noteHeight = element.instance.int(element.instance.height / numNotes)
             
             // Iterate over each note of the scale
             for (let i = 0; i < numNotes; i++){
@@ -230,15 +230,10 @@ function sendNote(beat){
                 })
                 // when detecting a note send note on
                 if(vertexCount >= 1) {
-                    console.log('vertexCount: ' + vertexCount)
                     velocityMaxAverage /= vertexCount
-                    console.log('velocityMax: ' + velocityMaxAverage)
                     vertexCount = element.instance.map(vertexCount, 0, 70, .1, 10)
-                    console.log('vertexCount Mapped: ' + vertexCount)
                     let velocityShare = element.instance.map(Math.log(vertexCount), Math.log(.1), Math.log(10), 0, 1)
                     let velocity = element.instance.constrain(velocityShare * velocityMaxAverage, 0, 127)
-                    console.log('verlShare: ' + velocityShare)
-                    console.log('velocity: ' + velocity)
                     // on other beats just compare
                     if(beat == 1 || element.previousNotes[i] == false) {
                         // Send note when avg is higher than some threshold
