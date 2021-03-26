@@ -102,4 +102,8 @@ io.on('connection', function (socket){
     socket.on('octave-setup', function(data){
         socket.broadcast.emit('client-octave-setup', {id: socket.id, octave: data.octave})
     })
+
+    socket.on('key-setup', function(data){
+        socket.broadcast.emit('client-key-setup', {id: socket.id, key: data.key})
+    })
 })

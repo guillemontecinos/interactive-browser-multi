@@ -53,7 +53,9 @@ socket.on('new client', function(data){
         scale: [1, 3, 5, 6, 8, 10, 12], 
         scaleOnUse: [1, 3, 5, 6, 8, 10, 12], 
         octave: 0,
-        octaveOnUse: 0
+        octaveOnUse: 0, 
+        key: 0,
+        keyOnUse: 0
     })
 })
 
@@ -93,6 +95,11 @@ socket.on('client-scale-setup', function(data){
 socket.on('client-octave-setup', function(data){
     let index = clients.findIndex(element => element.id === data.id)
     clients[index].octave = data.octave
+})
+
+socket.on('client-key-setup', function(data){
+    let index = clients.findIndex(element => element.id === data.id)
+    clients[index].key = data.key
 })
 
 function pointReceived(element, data){
@@ -238,6 +245,7 @@ function sendNote(beat){
                 element.previousNotes.length = 0
                 element.previousNotes = new Array(numNotes).fill(false)
                 element.octaveOnUse = element.octave
+                element.keyOnUse = element.key
             }
             // Iterate over each note of the scale
             for (let i = 0; i < numNotes; i++){
@@ -263,7 +271,7 @@ function sendNote(beat){
                         // Send note when avg is higher than some threshold
                         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
                             // 60 + scale.length - i, 
-                            60 + element.octaveOnUse * 12 + Number(element.scaleOnUse[numNotes - i - 1]) - 1,
+                            60 + element.octaveOnUse * 12 + element.keyOnUse + Number(element.scaleOnUse[numNotes - i - 1]) - 1,
                             element.channel, 
                             {
                                 duration: 5000, 
@@ -279,7 +287,7 @@ function sendNote(beat){
                     if(beat == 1 || element.previousNotes[i] == true) {
                         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).stopNote(
                             // 60 + scale.length - i, 
-                            60 + element.octaveOnUse * 12 + Number(element.scaleOnUse[numNotes - i - 1]) - 1,
+                            60 + element.octaveOnUse * 12 + element.keyOnUse + Number(element.scaleOnUse[numNotes - i - 1]) - 1,
                             element.channel, 
                             {
                                 time: 0, 

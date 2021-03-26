@@ -32,6 +32,8 @@ let scaleOnUse = new Array()
 let scalePattern = new Array(12).fill(true)
 let previousNotes = new Array(numNotes).fill(false)
 let octave = 0
+const keys = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+let currentKey = 0
 let barCount = 1
 let ppqnCount = 0
 let timeNumerator = 0
@@ -148,6 +150,18 @@ function buttonSubmit(){
         }
     })
     
+    // Setup listeners to keep track of Key
+    document.getElementById('key-button-left').addEventListener('click', function() {
+        if(currentKey > 0) currentKey--
+        else if(currentKey == 0) currentKey = keys.length - 1
+        displayKey(currentKey)
+    })
+    document.getElementById('key-button-right').addEventListener('click', function() {
+        if(currentKey < keys.length - 1) currentKey++
+        else if(currentKey == keys.length - 1) currentKey = 0
+        displayKey(currentKey)
+    })
+
     // Setup listeners to keep track of notes checkboxes
     for(let i = 0; i < notesCheckboxes.length; i++) {
         notesCheckboxes[i].addEventListener('click', function(){
@@ -191,6 +205,11 @@ function displayOctave(value){
     socket.emit('octave-setup', {octave: value})
     if(value > 0) value = '+' + value
     document.getElementById('octave-display').innerHTML = value
+}
+
+function displayKey(value){
+    socket.emit('key-setup', {key: value})
+    document.getElementById('key-display').innerHTML = keys[value]
 }
 
 // Mouse moved event for desktop devices
@@ -270,12 +289,13 @@ function clearCurves(){
 }
 
 // Declare tone syntheziser
-const masterGain = new Tone.Gain(.25).toDestination()
+const masterGain = new Tone.Gain(0).toDestination()
 const synth = new Tone.PolySynth().connect(masterGain)
 synth.options.envelope.attack = 0.1,
 synth.options.envelope.release = 0.3
 
 let octaveOnUse = 0
+let keyOnUse = 0
 function playNote(beat){
     if(beat == 1) {
         numNotes = scale.length
@@ -283,6 +303,7 @@ function playNote(beat){
         previousNotes.length = 0
         previousNotes = new Array(numNotes).fill(false)
         octaveOnUse = octave
+        keyOnUse = currentKey
     }
     for (let i = 0; i < numNotes; i++){
         let vertexCount = 0
@@ -297,7 +318,7 @@ function playNote(beat){
             // on other beats just compare
             if(beat == 1 || previousNotes[i] == false) {
                 // play note
-                let freq = Tone.Midi(60 + octaveOnUse * 12 + scaleOnUse[numNotes - i - 1] - 1).toFrequency()
+                let freq = Tone.Midi(60 + octaveOnUse * 12 + keyOnUse + scaleOnUse[numNotes - i - 1] - 1).toFrequency()
                 synth.triggerAttack(freq, Tone.now())
             }
             previousNotes[i] = true
@@ -306,7 +327,7 @@ function playNote(beat){
         else{
             if(beat == 1 || previousNotes[i] == true) {
                 // stop note
-                let freq = Tone.Midi(60 + octaveOnUse * 12 + scaleOnUse[numNotes - i - 1] - 1).toFrequency()
+                let freq = Tone.Midi(60 + octaveOnUse * 12 + keyOnUse + scaleOnUse[numNotes - i - 1] - 1).toFrequency()
                 synth.triggerRelease(freq, Tone.now())
             }
             previousNotes[i] = false
@@ -316,11 +337,10 @@ function playNote(beat){
 }
 
 function stopNotes(){
-    for(let i = 0; i < numNotes; i++){
-        let freq = Tone.Midi(60 + octaveOnUse * 12 + scaleOnUse[numNotes - i]).toFrequency()
-        // synth.triggerRelease(freq, Tone.now())
+    scaleOnUse.forEach(note => {
+        let freq = Tone.Midi(60 + octaveOnUse * 12 + keyOnUse + note).toFrequency()
         synth.triggerRelease(Tone.now())
-    }
+    })
 }
 
 window.addEventListener('resize', updateCanvasSize)
