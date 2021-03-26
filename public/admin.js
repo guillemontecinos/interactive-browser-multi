@@ -30,7 +30,7 @@ for (let i = 0; i < 16; i++){
 socket.on('new client', function(data){
     console.log(data)
     // send current playing status to client
-    if(isPlaying) socket.emit('admin-playing-on-connection', {id: data.id, timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution, numNotes: numNotes})
+    if(isPlaying) socket.emit('admin-playing-on-connection', {id: data.id, timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution})
     // saves the data in the clients array
     // TODO: channel has to be setup based on the user's decision, this is just for testing
     let midiCh
@@ -43,7 +43,18 @@ socket.on('new client', function(data){
         }
     }
     makeClientLayout(data.id, data.username)
-    clients.push({id: data.id, username: data.username, instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), shape: [], channel: midiCh, previousNotes: new Array(numNotes).fill(false)})
+    clients.push({
+        id: data.id, 
+        username: data.username, 
+        instance: new p5(s, document.getElementById(data.id + '-canvas-wrapper')), 
+        shape: [], 
+        channel: midiCh, 
+        previousNotes: new Array(numNotes).fill(false), 
+        scale: [1, 3, 5, 6, 8, 10, 12], 
+        scaleOnUse: [1, 3, 5, 6, 8, 10, 12], 
+        octave: 0,
+        octaveOnUse: 0
+    })
 })
 
 socket.on('client disconnects', function(data){
@@ -74,6 +85,16 @@ socket.on('new data', function(data){
     }
 })
 
+socket.on('client-scale-setup', function(data){
+    let index = clients.findIndex(element => element.id === data.id)
+    clients[index].scale = data.scale
+})
+
+socket.on('client-octave-setup', function(data){
+    let index = clients.findIndex(element => element.id === data.id)
+    clients[index].octave = data.octave
+})
+
 function pointReceived(element, data){
     element.shape[element.shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
     element.instance.strokeWeight(element.instance.height / data.stroke)
@@ -97,8 +118,7 @@ const s = function(sketch){
 // MIDI section
 let ppqnCount = 0
 let barCount = 1
-let octaves = 1
-let numNotes = octaves * 12
+let numNotes = 7
 let timeNumerator = 4, timeDenominator = 4
 let isPlaying = false
 // Multiplies the time denominator in order to augment the number of notes that divide the 1/4 note. Can only take 1, 2 or 4 as values
@@ -176,7 +196,7 @@ function setMidiListeners(input){
         console.log('bar: 1')
         sendNote(1)
         isPlaying = true
-        socket.emit('admin-play', {status : 'play', timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution, numNotes: numNotes})
+        socket.emit('admin-play', {status : 'play', timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution})
     })
     input.addListener('stop', 'all', (e) => {
         console.log(e)
@@ -211,10 +231,14 @@ const stroke2velocity = {
 function sendNote(beat){
     if(clients.length > 0){
         clients.forEach(element => {
-            // TODO: implemente sending each user to a different channel
-            // const noteWidth = element.instance.int(element.instance.width / timeNumerator)
-            // const noteHeight = element.instance.int(element.instance.height / numNotes)
-            
+            // Reset any change on the scale that happend during the bar
+            if(beat == 1){
+                element.scaleOnUse = element.scale
+                numNotes = element.scaleOnUse.length
+                element.previousNotes.length = 0
+                element.previousNotes = new Array(numNotes).fill(false)
+                element.octaveOnUse = element.octave
+            }
             // Iterate over each note of the scale
             for (let i = 0; i < numNotes; i++){
                 let vertexCount = 0
@@ -238,12 +262,15 @@ function sendNote(beat){
                     if(beat == 1 || element.previousNotes[i] == false) {
                         // Send note when avg is higher than some threshold
                         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).playNote(
-                            60 + numNotes - i, 
+                            // 60 + scale.length - i, 
+                            60 + element.octaveOnUse * 12 + Number(element.scaleOnUse[numNotes - i - 1]) - 1,
                             element.channel, 
                             {
                                 duration: 5000, 
                                 velocity: velocity
                             })
+                            // let notePlayed = 60 + Number(element.scaleOnUse[numNotes - i - 1]) - 1
+                            // console.log('played: ' + notePlayed)
                     }
                     element.previousNotes[i] = true
                 }
@@ -251,7 +278,8 @@ function sendNote(beat){
                 else{
                     if(beat == 1 || element.previousNotes[i] == true) {
                         WebMidi.getOutputByName(document.getElementById('midi-port-dropdown').value).stopNote(
-                            60 + numNotes - i, 
+                            // 60 + scale.length - i, 
+                            60 + element.octaveOnUse * 12 + Number(element.scaleOnUse[numNotes - i - 1]) - 1,
                             element.channel, 
                             {
                                 time: 0, 

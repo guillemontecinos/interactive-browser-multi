@@ -94,4 +94,12 @@ io.on('connection', function (socket){
     socket.on('admin-playing-on-connection', function(data){
         socket.broadcast.emit('client-play-on-connection', data)
     })
+
+    socket.on('scale-setup', function(data){
+        socket.broadcast.emit('client-scale-setup', {id: socket.id, scale: data.scale})
+    })
+
+    socket.on('octave-setup', function(data){
+        socket.broadcast.emit('client-octave-setup', {id: socket.id, octave: data.octave})
+    })
 })
