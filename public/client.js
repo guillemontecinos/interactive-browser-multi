@@ -153,12 +153,13 @@ function buttonSubmit(){
     // Setup listeners to keep track of Key
     document.getElementById('key-button-left').addEventListener('click', function() {
         if(currentKey > 0) currentKey--
-        else if(currentKey == 0) currentKey = keys.length - 1
+        // The line below makes it a carrousel
+        // else if(currentKey == 0) currentKey = keys.length - 1
         displayKey(currentKey)
     })
     document.getElementById('key-button-right').addEventListener('click', function() {
         if(currentKey < keys.length - 1) currentKey++
-        else if(currentKey == keys.length - 1) currentKey = 0
+        // else if(currentKey == keys.length - 1) currentKey = 0
         displayKey(currentKey)
     })
 
