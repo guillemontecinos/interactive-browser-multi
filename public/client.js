@@ -36,9 +36,9 @@ const keys = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 let currentKey = 0
 let barCount = 1
 let ppqnCount = 0
-let timeNumerator = 0
-let timeDenominator = 0
-let timeResolution = 1
+let timeNumerator = 4
+let timeDenominator = 4
+let timeResolution = 4
 
 socket.on('client-play', (data) => {
     if(data.status == 'play'){
@@ -181,6 +181,10 @@ function buttonSubmit(){
             }            
             // TODO: Send notes to admin
             socket.emit('scale-setup', {scale: scale})
+            // Update background grid
+            background(255)
+            drawGrid()
+            reDrawCurves()
         })
         // Setup initial major scale on checkers and scalePattern array
         const val = notesCheckboxes[i].value
@@ -198,6 +202,7 @@ function buttonSubmit(){
     })
     scaleOnUse = scale
     onInterface = true
+    drawGrid()
 }
 
 // Additional functions for listeners setup after button pressed
@@ -274,6 +279,7 @@ function curveDuring(){
 }
 
 function drawCurve(){
+    stroke(0)
     let aux = curves.shape[curves.shape.length - 1]
     if(aux.length >= 2) {
         strokeWeight(height / aux[aux.length - 2].stroke)
@@ -286,6 +292,42 @@ function clearCurves(){
     background(255)
     socket.emit('client interacted', {x: 0, y: 0, action: 'reset'})
     stopNotes()
+    drawGrid()
+}
+
+function reDrawCurves(){
+    stroke(0)
+    curves.shape.forEach(shape => {
+        const numVertices = shape.length
+        if(numVertices >= 2) {
+            for(let i = 0; i < numVertices - 1; i++){
+                strokeWeight(height / shape[i].stroke)
+                line(shape[i].x * width, shape[i].y * height, shape[i + 1].x * width, shape[i + 1].y * height)
+            }
+        }
+    })
+}
+
+function drawGrid() {
+    stroke(200)
+    strokeWeight(1)
+    const yStep = height / scale.length
+    for(let y = 1; y < scale.length; y++) {
+        line(0, y * yStep, width, y * yStep)
+    }
+    const numLines = timeNumerator * timeResolution
+    const xStep = width / numLines
+    for(let x = 1; x < numLines; x++) {
+        if(x % timeResolution == 0) {
+            stroke(150)
+            strokeWeight(2)
+        }
+        else {
+            stroke(200)
+            strokeWeight(1)
+        }
+        line(x * xStep, 0, x * xStep, height)
+    }
 }
 
 // Declare tone syntheziser
