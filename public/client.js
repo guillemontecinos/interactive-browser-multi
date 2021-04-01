@@ -186,6 +186,8 @@ function buttonSubmit(){
             background(255)
             drawGrid()
             reDrawCurves()
+            // Debug
+            console.log(scale)
         })
         // Setup initial major scale on checkers and scalePattern array
         const val = notesCheckboxes[i].value
@@ -391,6 +393,7 @@ window.addEventListener('resize', updateCanvasSize)
 function updateCanvasSize(){
     resizeCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
     background(255)
+    drawGrid()
     if(curves.shape.length >= 1){
         curves.shape.forEach(aux => {
             if(aux.length >= 2) {

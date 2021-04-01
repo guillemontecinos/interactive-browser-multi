@@ -275,12 +275,40 @@ button {
   text-align: right;
 }
 
+.client-draw-container .client-main .client-ui .client-scale-ui .octave-selector .octave-display.key {
+  text-align: center;
+}
+
 .client-draw-container .client-main .client-ui .client-scale-ui .scale-selector {
   margin-top: 3px;
 }
 
 .client-draw-container .client-main .client-ui .client-scale-ui .scale-selector .note-selector {
   float: right;
+}
+
+.client-draw-container .client-main .client-ui .client-scale-ui .scale-selector .note-selector label {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.client-draw-container .client-main .client-ui .client-scale-ui .scale-selector .note-selector label input:checked + .checkmark {
+  background: black;
+}
+
+.client-draw-container .client-main .client-ui .client-scale-ui .scale-selector .note-selector label .checkmark {
+  border: 2px solid black;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  right: 2px;
+  top: 3px;
+}
+
+.client-draw-container .client-main .client-ui .client-scale-ui .scale-selector .note-selector label input {
+  opacity: 0.0;
 }
 
 .client-draw-container .client-main .client-ui .client-stroke-ui {
