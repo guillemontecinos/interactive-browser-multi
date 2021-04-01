@@ -180,14 +180,11 @@ function buttonSubmit(){
                     }
                 })
             }            
-            // TODO: Send notes to admin
             socket.emit('scale-setup', {scale: scale})
             // Update background grid
             background(255)
             drawGrid()
             reDrawCurves()
-            // Debug
-            console.log(scale)
         })
         // Setup initial major scale on checkers and scalePattern array
         const val = notesCheckboxes[i].value
@@ -377,7 +374,6 @@ function playNote(beat){
             }
             previousNotes[i] = false
         }
-        // console.log(notes[numNotes - i])
     }
 }
 
@@ -405,7 +401,6 @@ function updateCanvasSize(){
         })
     }
     for (let i = 0; i < strokeButtons.length; i++) {
-        // strokeButtons[i].style.width = height / Number(strokeButtons[i].value) + 'px'
         strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
     }
     document.getElementById('client-stroke-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'

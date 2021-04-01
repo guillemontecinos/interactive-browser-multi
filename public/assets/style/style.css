@@ -64,6 +64,11 @@ body {
 
 button {
   outline: none;
+  cursor: pointer;
+}
+
+select {
+  cursor: pointer;
 }
 
 .top-bar {
