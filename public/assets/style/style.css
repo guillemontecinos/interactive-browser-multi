@@ -67,6 +67,10 @@ button {
   cursor: pointer;
 }
 
+select {
+  cursor: pointer;
+}
+
 .top-bar {
   position: relative;
   height: 35px;
