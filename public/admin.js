@@ -113,17 +113,46 @@ socket.on('client-bars-setup', function(data){
     if(clients[index].bars == 1) content = '1 bar'
     else content = clients[index].bars + ' bars'
     document.getElementById(clients[index].id + '-bars').children[0].innerHTML = content
+    // clear canvas
+    clients[index].instance.background(255)
+    // draw background lines
+    drawGrid(clients[index])
+    // redraw lines
+    reDrawCurves(clients[index])
 })
 
 function pointReceived(element, data){
     element.shape[element.shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
     element.instance.strokeWeight(element.instance.height / data.stroke)
+    element.instance.stroke(0)
     let aux = element.shape[element.shape.length - 1]
     if(aux.length >= 2) element.instance.line(aux[aux.length - 2].x * element.instance.width, aux[aux.length - 2].y * element.instance.height, aux[aux.length - 1].x * element.instance.width, aux[aux.length - 1].y * element.instance.height)
 }
 
+function drawGrid(element){
+    for(let i = 1; i < element.bars; i++){
+        element.instance.stroke(150)
+        element.instance.strokeWeight(1)
+        element.instance.line(element.instance.width * i / element.bars, 0, element.instance.width * i / element.bars, element.instance.height)
+    }
+}
+
+function reDrawCurves(element){
+    element.instance.stroke(0)
+    element.shape.forEach(curve => {
+        const numVertices = curve.length
+        if(numVertices >= 2) {
+            for(let i = 0; i < numVertices - 1; i++){
+                element.instance.strokeWeight(element.instance.height / curve[i].stroke)
+                element.instance.line(curve[i].x * element.instance.width, curve[i].y * element.instance.height, curve[i + 1].x * element.instance.width, curve[i + 1].y * element.instance.height)
+            }
+        }
+    })
+}
+
 function resetClient(element){
     element.instance.background(255)
+    drawGrid(element)
     element.shape = []
 }
 

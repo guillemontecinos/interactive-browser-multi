@@ -71,6 +71,10 @@ select {
   cursor: pointer;
 }
 
+input {
+  outline: none;
+}
+
 .top-bar {
   position: relative;
   height: 35px;
