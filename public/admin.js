@@ -9,6 +9,7 @@ const socket = io()
 
 // Welcome alert, waiting for admin to input password
 const input = document.getElementById('username-value')
+input.focus()
 const button = document.getElementById('username-submit')
 
 button.addEventListener('click', function(){
@@ -55,7 +56,10 @@ socket.on('new client', function(data){
         octave: 0,
         octaveOnUse: 0, 
         key: 0,
-        keyOnUse: 0
+        keyOnUse: 0,
+        bars: 1,
+        barsOnUse: 1,
+        currentBar: 0
     })
 })
 
@@ -88,29 +92,67 @@ socket.on('new data', function(data){
 })
 
 socket.on('client-scale-setup', function(data){
-    let index = clients.findIndex(element => element.id === data.id)
+    const index = clients.findIndex(element => element.id === data.id)
     clients[index].scale = data.scale
 })
 
 socket.on('client-octave-setup', function(data){
-    let index = clients.findIndex(element => element.id === data.id)
+    const index = clients.findIndex(element => element.id === data.id)
     clients[index].octave = data.octave
 })
 
 socket.on('client-key-setup', function(data){
-    let index = clients.findIndex(element => element.id === data.id)
+    const index = clients.findIndex(element => element.id === data.id)
     clients[index].key = data.key
+})
+
+socket.on('client-bars-setup', function(data){
+    const index = clients.findIndex(element => element.id === data.id)
+    clients[index].bars = data.bars
+    let content
+    if(clients[index].bars == 1) content = '1 bar'
+    else content = clients[index].bars + ' bars'
+    document.getElementById(clients[index].id + '-bars').children[0].innerHTML = content
+    // clear canvas
+    clients[index].instance.background(255)
+    // draw background lines
+    drawGrid(clients[index])
+    // redraw lines
+    reDrawCurves(clients[index])
 })
 
 function pointReceived(element, data){
     element.shape[element.shape.length - 1].push({x: data.x, y: data.y, stroke: data.stroke})
     element.instance.strokeWeight(element.instance.height / data.stroke)
+    element.instance.stroke(0)
     let aux = element.shape[element.shape.length - 1]
     if(aux.length >= 2) element.instance.line(aux[aux.length - 2].x * element.instance.width, aux[aux.length - 2].y * element.instance.height, aux[aux.length - 1].x * element.instance.width, aux[aux.length - 1].y * element.instance.height)
 }
 
+function drawGrid(element){
+    for(let i = 1; i < element.bars; i++){
+        element.instance.stroke(150)
+        element.instance.strokeWeight(1)
+        element.instance.line(element.instance.width * i / element.bars, 0, element.instance.width * i / element.bars, element.instance.height)
+    }
+}
+
+function reDrawCurves(element){
+    element.instance.stroke(0)
+    element.shape.forEach(curve => {
+        const numVertices = curve.length
+        if(numVertices >= 2) {
+            for(let i = 0; i < numVertices - 1; i++){
+                element.instance.strokeWeight(element.instance.height / curve[i].stroke)
+                element.instance.line(curve[i].x * element.instance.width, curve[i].y * element.instance.height, curve[i + 1].x * element.instance.width, curve[i + 1].y * element.instance.height)
+            }
+        }
+    })
+}
+
 function resetClient(element){
     element.instance.background(255)
+    drawGrid(element)
     element.shape = []
 }
 
@@ -134,20 +176,20 @@ let timeResolution = 4
 // Setting up time numerator input
 const timeNumeratorInput = document.getElementById('tempo-numerator')
 timeNumeratorInput.addEventListener('keydown', function(e){
-    if(e.keyCode === 13){
-        if(Number(timeNumeratorInput.value) <= 8) timeNumerator = Number(timeNumeratorInput.value)
+    if(e.keyCode === 13 || e.keyCode === 9){
+        if(Number(timeNumeratorInput.value) <= 8 && timeNumeratorInput.value != '') timeNumerator = Number(timeNumeratorInput.value)
         else timeNumeratorInput.value = timeNumerator
         timeNumeratorInput.placeholder = timeNumerator
     }
-    
 })
 // Setting up time denominator input
 const timeDenominatorInput = document.getElementById('tempo-denominator')
 timeDenominatorInput.addEventListener('keydown', function(e){
-    if(e.keyCode === 13){
-        if(Number(timeDenominatorInput.value) <= 16) timeDenominator = Number(timeDenominatorInput.value)
+    if(e.keyCode === 13 || e.keyCode === 9){
+        if(Number(timeDenominatorInput.value) <= 16 && timeNumeratorInput.value != '') timeDenominator = Number(timeDenominatorInput.value)
         else timeDenominatorInput.value = timeDenominator
         timeDenominatorInput.placeholder = timeDenominator
+        // get rid of cursor when hitting enter
     }
 })
 
@@ -201,6 +243,10 @@ function setMidiListeners(input){
     console.log('MIDI listeners added to "' + input.name + '"')
     input.addListener('start', 'all', (e) => {
         console.log('bar: 1')
+        // Set current bar to 0 for all users
+        clients.forEach(client => {
+            client.currentBar = 0
+        })
         sendNote(1)
         isPlaying = true
         socket.emit('admin-play', {status : 'play', timeNumerator: timeNumerator, timeDenominator: timeDenominator, timeResolution: timeResolution})
@@ -219,7 +265,7 @@ function setMidiListeners(input){
             ppqnCount = 0
             barCount += 1 / timeResolution
             if(barCount == timeNumerator + 1) barCount = 1
-            console.log('bar: ' + barCount)
+            // console.log('bar: ' + barCount)
             // calculate and send notes
             sendNote(barCount)
         }
@@ -246,12 +292,23 @@ function sendNote(beat){
                 element.previousNotes = new Array(numNotes).fill(false)
                 element.octaveOnUse = element.octave
                 element.keyOnUse = element.key
+                element.currentBar++
+                if(element.currentBar > element.barsOnUse) {
+                    element.currentBar = 1
+                    element.barsOnUse = element.bars
+                }
+                console.log('current Bar: ' + element.currentBar)
             }
+            
+            // noteArea is defined as x & y coordinates where the box start and end, not as x,y,w,h.
+            const barShift = (element.currentBar - 1) / element.barsOnUse
+            const beatShift = (beat - 1) / (timeNumerator * element.barsOnUse)
+            const noteWidth = 1 / (timeNumerator * timeResolution * element.barsOnUse)
             // Iterate over each note of the scale
             for (let i = 0; i < numNotes; i++){
                 let vertexCount = 0
                 let velocityMaxAverage = 0
-                const noteArea = {x1: (beat - 1) / timeNumerator, y1: i / numNotes, x2: beat / timeNumerator, y2: (i + 1) / numNotes}
+                const noteArea = {x1: barShift + beatShift, y1: i / numNotes, x2: barShift + beatShift + noteWidth, y2: (i + 1) / numNotes}
                 element.shape.forEach(curve => {
                     curve.forEach((vertex) => {
                         if(vertex.x >= noteArea.x1 && vertex.x <= noteArea.x2 && vertex.y >= noteArea.y1 && vertex.y <= noteArea.y2) {
@@ -371,6 +428,7 @@ function makeClientLayout(clientId, name){
     const dropdown = document.createElement('select')
     dropdown.className = 'dropdown-menu'
     dropdown.id = clientId + '-dropdown'
+
     // create options based on channels array
     channels.forEach(channel => {
         if(channel.inUse == false) {
@@ -401,14 +459,21 @@ function makeClientLayout(clientId, name){
         channels[Number(thisChannel - 1)].inUse = true
         channels[Number(thisChannel - 1)].userID = clientId
         
-        // console.log(clients[clientIndex].username + ' is using MIDI Channel #' + thisChannel)
-        
         // update all clients channels
         updateMIDIChannels()
     })
 
+    // Client instance Bars
+    const bars = document.createElement('div')
+    bars.className = 'client-instance-bars'
+    bars.id = clientId + '-bars'
+    const barsText = document.createElement('p')
+    barsText.innerHTML = '1 bar'
+    bars.appendChild(barsText)
+
     midiChannel.appendChild(dropdown)
     clientMenu.appendChild(midiChannel)
+    clientMenu.appendChild(bars)
     clientContent.appendChild(clientMenu)
 
     //===== 

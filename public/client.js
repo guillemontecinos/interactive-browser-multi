@@ -39,6 +39,7 @@ let ppqnCount = 0
 let timeNumerator = 4
 let timeDenominator = 4
 let timeResolution = 4
+let bars = 1
 
 socket.on('client-play', (data) => {
     if(data.status == 'play'){
@@ -55,6 +56,10 @@ socket.on('client-play', (data) => {
         console.log('client stop')
         stopNotes()
     }
+    // reset grid
+    background(255)
+    drawGrid()
+    reDrawCurves()
 })
 
 socket.on('client-play-on-connection', (data) => {
@@ -86,6 +91,7 @@ socket.on('client-clock', (data) => {
 
 function setup(){
     input = document.getElementById('username-value')
+    input.focus()
     button = document.getElementById('username-submit')
     button.addEventListener('click', buttonSubmit)
     input.style.visibility = 'hidden'
@@ -124,17 +130,6 @@ function buttonSubmit(){
 
     clearBtn = document.getElementById('clear-btn')
     clearBtn.addEventListener('click', clearCurves)
-    
-    // Setup listeners for when stroke buttons are pressed, and setup initial sizes
-    for (let i = 0; i < strokeButtons.length; i++) {
-        strokeButtons[i].addEventListener('click', function() {
-            strokeFactor = Number(this.value)
-            console.log('strokeFactor: ' + strokeFactor)
-        })
-        strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
-    }
-    document.getElementById('client-stroke-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
-    document.getElementById('client-scale-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
 
     // Setup listeners to keep track of octave
     document.getElementById('octave-button-left').addEventListener('click', function() {
@@ -201,6 +196,28 @@ function buttonSubmit(){
         if(note) scale.push(i + 1)
     })
     scaleOnUse = scale
+
+    // Setup listeners for bar selector buttons
+    document.getElementById('bar-button-left').addEventListener('click', function() {
+        if(bars > 1) bars--
+        displayBars(bars)
+    })
+    document.getElementById('bar-button-right').addEventListener('click', function() {
+        if(bars < 3) bars++
+        displayBars(bars)
+    })
+
+    // Setup listeners for when stroke buttons are pressed, and setup initial sizes
+    for (let i = 0; i < strokeButtons.length; i++) {
+        strokeButtons[i].addEventListener('click', function() {
+            strokeFactor = Number(this.value)
+            console.log('strokeFactor: ' + strokeFactor)
+        })
+        strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
+    }
+    document.getElementById('client-right-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
+    document.getElementById('client-scale-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
+
     onInterface = true
     drawGrid()
 }
@@ -215,6 +232,14 @@ function displayOctave(value){
 function displayKey(value){
     socket.emit('key-setup', {key: value})
     document.getElementById('key-display').innerHTML = keys[value]
+}
+
+function displayBars(value){
+    socket.emit('bars-setup', {bars: value})
+    document.getElementById('bar-display').innerHTML = bars
+    background(255)
+    drawGrid()
+    reDrawCurves()
 }
 
 // Mouse moved event for desktop devices
@@ -311,19 +336,25 @@ function reDrawCurves(){
 function drawGrid() {
     stroke(200)
     strokeWeight(1)
+    // Draw notes
     const yStep = height / scale.length
     for(let y = 1; y < scale.length; y++) {
         line(0, y * yStep, width, y * yStep)
     }
-    const numLines = timeNumerator * timeResolution
+    // Draw time
+    const numLines = timeNumerator * timeResolution * bars
     const xStep = width / numLines
     for(let x = 1; x < numLines; x++) {
-        if(x % timeResolution == 0) {
-            stroke(150)
+        if(x % (timeNumerator * timeResolution) == 0) {
+            stroke(80 + 20 * bars)
+            strokeWeight(3)
+        }
+        else if(x % timeResolution == 0) {
+            stroke(150 + 20 * bars)
             strokeWeight(2)
         }
         else {
-            stroke(200)
+            stroke(190 + 15 * bars)
             strokeWeight(1)
         }
         line(x * xStep, 0, x * xStep, height)
@@ -403,6 +434,6 @@ function updateCanvasSize(){
     for (let i = 0; i < strokeButtons.length; i++) {
         strokeButtons[i].firstElementChild.style.width = height / Number(strokeButtons[i].value) + 'px'
     }
-    document.getElementById('client-stroke-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
+    document.getElementById('client-right-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
     document.getElementById('client-scale-ui').style.width = height / Number(strokeButtons[0].value) + 10 + 'px'
 }
