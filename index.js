@@ -106,4 +106,8 @@ io.on('connection', function (socket){
     socket.on('key-setup', function(data){
         socket.broadcast.emit('client-key-setup', {id: socket.id, key: data.key})
     })
+
+    socket.on('bars-setup', function(data){
+        socket.broadcast.emit('client-bars-setup', {id: socket.id, bars: data.bars})
+    })
 })

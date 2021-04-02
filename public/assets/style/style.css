@@ -316,14 +316,40 @@ select {
   opacity: 0.0;
 }
 
-.client-draw-container .client-main .client-ui .client-stroke-ui {
+.client-draw-container .client-main .client-ui .client-right-ui {
   display: inline-block;
   margin-left: 10px;
   border: 2px solid black;
   padding: 5px;
 }
 
-.client-draw-container .client-main .client-ui .client-stroke-ui button {
+.client-draw-container .client-main .client-ui .client-right-ui .bar-selector {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.client-draw-container .client-main .client-ui .client-right-ui .bar-selector .bar-button {
+  width: 25%;
+  padding: 0px;
+  background: none;
+  border: none;
+  display: inline-block;
+}
+
+.client-draw-container .client-main .client-ui .client-right-ui .bar-selector .bar-button img {
+  width: 100%;
+}
+
+.client-draw-container .client-main .client-ui .client-right-ui .bar-selector .bar-display {
+  width: 25%;
+  aspect-ratio: 1;
+  display: inline-block;
+  background: white;
+  vertical-align: top;
+  text-align: center;
+}
+
+.client-draw-container .client-main .client-ui .client-right-ui button {
   display: block;
   aspect-ratio: 1;
   border: none;
@@ -331,7 +357,7 @@ select {
   margin: auto;
 }
 
-.client-draw-container .client-main .client-ui .client-stroke-ui button img {
+.client-draw-container .client-main .client-ui .client-right-ui button img {
   text-align: center;
 }
 
@@ -461,6 +487,22 @@ select {
   font-size: large;
   background: #C4C4C4;
   border: 2px solid black;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-bars {
+  width: calc(90% - 4px);
+  height: 35px;
+  margin: auto;
+  margin-top: 4px;
+  font-family: 'Ubuntu Mono';
+  font-size: large;
+  border: 2px solid black;
+}
+
+.client-instance-container .client-instance-content .client-instance-side-menu .client-instance-bars p {
+  -webkit-transform: translate(0px, 8px);
+          transform: translate(0px, 8px);
+  margin-left: 4px;
 }
 
 .client-instance-container .client-instance-content .client-instance-side-menu .client-instance-tempo {
