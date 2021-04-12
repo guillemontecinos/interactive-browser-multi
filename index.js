@@ -7,7 +7,7 @@ const app = express()
 const server = require('http').createServer(app)
 
 // HTTP framework for socket
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 8000
 server.listen(port, function(){
     console.log('Interactive browser Multiuser v1 listening on port ' + port)
 })
@@ -57,6 +57,8 @@ io.on('connection', function (socket){
         socket.broadcast.emit('new data', {id: socket.id, username: socket.username, x: data.x, y: data.y, stroke: data.stroke, action: data.action})
         // check what client is sending data
         const index = clients.findIndex(element => element.id === socket.id)
+        // In the meantime, when a client is not found do nothing
+        if(index === -1) return
         // push path to client
         if(data.action == 'start'){
             clients[index].shape.push([])
