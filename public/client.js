@@ -9,17 +9,24 @@ let input, button, onInterface = false, curves, clearBtn, adminConnected = false
 
 // Admin connected checker
 socket.on('connect', () => {
-    if(onInterface){
-        // alert('Server not conneted, please reset.')
-        document.getElementById('client-draw-container').style.display = 'none'
-        document.getElementById('client-welcome-alert').style.display = 'block'
-        document.getElementById('ui-message').innerHTML = 'The APP restarted due to a conection failure. Please reinsert your username.'
-        document.getElementById('username-value').value = ''
-    }
+    if(onInterface) {
+        input.style.visibility = 'visible'
+        button.style.visibility = 'visible'
+        document.getElementById('ui-message').innerHTML = 'Please insert your username again.'
+    }   
 })
 
 socket.on('disconnect', () => {
-    alert('Server disconnected, please wait for it to reconnect')
+    // alert('Server disconnected, please wait for it to reconnect')
+    if(onInterface){
+        // alert('Server not conneted, please reset.')
+        input.style.visibility = 'hidden'
+        button.style.visibility = 'hidden'
+        document.getElementById('client-draw-container').style.display = 'none'
+        document.getElementById('client-welcome-alert').style.display = 'block'
+        document.getElementById('ui-message').innerHTML = 'The server has disconnected, please wait for it to reconnect.'
+        document.getElementById('username-value').value = ''
+    }
 })
 
 socket.on('admin status', (data) => {
