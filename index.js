@@ -7,7 +7,7 @@ const app = express()
 const server = require('http').createServer(app)
 
 // HTTP framework for socket
-const port = process.env.PORT || 8000
+const port = process.env.PORT || 3000
 server.listen(port, function(){
     console.log('Interactive browser Multiuser v1 listening on port ' + port)
 })
