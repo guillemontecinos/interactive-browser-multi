@@ -5,9 +5,23 @@
 // TODO: update this address with the current IP
 
 const socket = io()
-let input, button, onInterface = false, curves = {shape: []}, clearBtn, adminConnected = false
+let input, button, onInterface = false, curves, clearBtn, adminConnected = false
 
 // Admin connected checker
+socket.on('connect', () => {
+    if(onInterface){
+        // alert('Server not conneted, please reset.')
+        document.getElementById('client-draw-container').style.display = 'none'
+        document.getElementById('client-welcome-alert').style.display = 'block'
+        document.getElementById('ui-message').innerHTML = 'The APP restarted due to a conection failure. Please reinsert your username.'
+        document.getElementById('username-value').value = ''
+    }
+})
+
+socket.on('disconnect', () => {
+    alert('Server disconnected, please wait for it to reconnect')
+})
+
 socket.on('admin status', (data) => {
     console.log('Admin status: ' + data.status)
     adminConnected = data.status
@@ -120,7 +134,9 @@ function buttonSubmit(){
     const username = input.value
     socket.emit('nickname', username)
 
-    document.getElementById('client-welcome-alert').remove()
+    curves = {shape: []}
+
+    document.getElementById('client-welcome-alert').style.display = 'none'
     document.getElementById('client-draw-container').style.display = 'block'
     document.getElementById('top-bar-title-p').innerHTML = 'Interactive Browser Experience – ' + username
  
