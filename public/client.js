@@ -444,7 +444,7 @@ function updateCanvasSize(){
     resizeCanvas(clientWrap.clientWidth, clientWrap.clientWidth * 9 / 16)
     background(255)
     drawGrid()
-    stroke(255)
+    stroke(0)
     if(curves.shape.length >= 1){
         curves.shape.forEach(aux => {
             if(aux.length >= 2) {
