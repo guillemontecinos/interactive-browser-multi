@@ -28,6 +28,20 @@ for (let i = 0; i < 16; i++){
     channels.push({channel: i + 1, inUse: false, userID: ''})
 }
 
+socket.on('connect', function(){
+    if(signedIn) alert('Server reconnected!')
+})
+
+socket.on('disconnect', function(){
+    alert('Server disconnected, please wait for it to reconnect.')
+    // clear all clients
+    clients.forEach(client => {
+        document.getElementById(client.id + '-container').remove()
+    })
+    clients.length = 0
+    clients = []
+})
+
 socket.on('new client', function(data){
     console.log(data)
     // send current playing status to client

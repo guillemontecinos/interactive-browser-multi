@@ -5,9 +5,30 @@
 // TODO: update this address with the current IP
 
 const socket = io()
-let input, button, onInterface = false, curves = {shape: []}, clearBtn, adminConnected = false
+let input, button, onInterface = false, curves, clearBtn, adminConnected = false
 
 // Admin connected checker
+socket.on('connect', () => {
+    if(onInterface) {
+        input.style.visibility = 'visible'
+        button.style.visibility = 'visible'
+        document.getElementById('ui-message').innerHTML = 'Please insert your username again.'
+    }   
+})
+
+socket.on('disconnect', () => {
+    // alert('Server disconnected, please wait for it to reconnect')
+    if(onInterface){
+        // alert('Server not conneted, please reset.')
+        input.style.visibility = 'hidden'
+        button.style.visibility = 'hidden'
+        document.getElementById('client-draw-container').style.display = 'none'
+        document.getElementById('client-welcome-alert').style.display = 'block'
+        document.getElementById('ui-message').innerHTML = 'The server has disconnected, please wait for it to reconnect.'
+        document.getElementById('username-value').value = ''
+    }
+})
+
 socket.on('admin status', (data) => {
     console.log('Admin status: ' + data.status)
     adminConnected = data.status
@@ -120,7 +141,9 @@ function buttonSubmit(){
     const username = input.value
     socket.emit('nickname', username)
 
-    document.getElementById('client-welcome-alert').remove()
+    curves = {shape: []}
+
+    document.getElementById('client-welcome-alert').style.display = 'none'
     document.getElementById('client-draw-container').style.display = 'block'
     document.getElementById('top-bar-title-p').innerHTML = 'Interactive Browser Experience – ' + username
  
