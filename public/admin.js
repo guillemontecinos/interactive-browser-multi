@@ -216,6 +216,8 @@ WebMidi.enable(function (err) {
 
     // Adds inputs to the dropdown menu when new ports connect
     WebMidi.addListener('connected', (e) => {
+        console.log(e)
+        if(err) console.log(err)
         if (e.port.type == 'input' && !document.getElementById(e.port.id)) {
             console.log(e.port.name + ' connected')
             const option = document.createElement('option')
