@@ -215,6 +215,7 @@ timeDenominatorInput.addEventListener('keydown', function(e){
 
 WebMidi.enable(function (err) {
     // Selects input by using the dropdown menu
+    if(err) console.log(err)
     let input
     const dropdownMenu = document.getElementById('midi-port-dropdown')
     dropdownMenu.addEventListener('change', () => {
