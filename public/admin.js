@@ -18,7 +18,6 @@ button.addEventListener('click', function(){
         signedIn = true
         document.getElementById('client-welcome-alert').remove()
         socket.emit('nickname', 'admin')
-        enableMidi()
     }
 })
 
@@ -200,48 +199,46 @@ timeDenominatorInput.addEventListener('keydown', function(e){
 //     timeResolution = Number(timeResolutionInput.value)
 // })
 
-function enableMidi(){
-    WebMidi.enable(function (err) {
-        // Selects input by using the dropdown menu
-        if(err) console.log(err)
-        let input
-        const dropdownMenu = document.getElementById('midi-port-dropdown')
-        dropdownMenu.addEventListener('change', () => {
-            // Clear listeners of the previuous input
-            if (input) {
-                input.removeListener()
-            }
-            if(WebMidi.getInputByName(dropdownMenu.value).connection == 'open'){
-                input = WebMidi.getInputByName(dropdownMenu.value)
-                setMidiListeners(input)
-            }
-        })
-    
-        // Adds inputs to the dropdown menu when new ports connect
-        WebMidi.addListener('connected', (e) => {
-            if (e.port.type == 'input' && !document.getElementById(e.port.id)) {
-                console.log(e.port.name + ' connected')
-                const option = document.createElement('option')
-                option.id = e.port.id
-                option.text = e.port.name
-                document.getElementById('midi-port-dropdown').add(option)
-                // set callbacks only for first input por connected
-                if(document.getElementById('midi-port-dropdown').options.length == 1){
-                    setMidiListeners(WebMidi.getInputById(e.port.id))
-                }
-            }
-        })
-    
-        // Removes inputs to the dropdown menu when ports gets disconnected
-        WebMidi.addListener('disconnected', (e) => {
-            console.log(e.port.name + ' disconnected')
-            if (e.port.type == 'input') {
-                let option = document.getElementById(e.port.id)
-                option.remove()
-            }
-        })
+WebMidi.enable(function (err) {
+    // Selects input by using the dropdown menu
+    if(err) console.log(err)
+    let input
+    const dropdownMenu = document.getElementById('midi-port-dropdown')
+    dropdownMenu.addEventListener('change', () => {
+        // Clear listeners of the previuous input
+        if (input) {
+            input.removeListener()
+        }
+        if(WebMidi.getInputByName(dropdownMenu.value).connection == 'open'){
+            input = WebMidi.getInputByName(dropdownMenu.value)
+            setMidiListeners(input)
+        }
     })
-}
+
+    // Adds inputs to the dropdown menu when new ports connect
+    WebMidi.addListener('connected', (e) => {
+        if (e.port.type == 'input' && !document.getElementById(e.port.id)) {
+            console.log(e.port.name + ' connected')
+            const option = document.createElement('option')
+            option.id = e.port.id
+            option.text = e.port.name
+            document.getElementById('midi-port-dropdown').add(option)
+            // set callbacks only for first input por connected
+            if(document.getElementById('midi-port-dropdown').options.length == 1){
+                setMidiListeners(WebMidi.getInputById(e.port.id))
+            }
+        }
+    })
+
+    // Removes inputs to the dropdown menu when ports gets disconnected
+    WebMidi.addListener('disconnected', (e) => {
+        console.log(e.port.name + ' disconnected')
+        if (e.port.type == 'input') {
+            let option = document.getElementById(e.port.id)
+            option.remove()
+        }
+    })
+})
 
 function setMidiListeners(input){
     console.log('MIDI listeners added to "' + input.name + '"')
