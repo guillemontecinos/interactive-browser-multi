@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path')
+const enforece = require('express-sslify')
 
 // Instantiate express app
 const app = express()
@@ -7,16 +8,16 @@ const app = express()
 const server = require('http').createServer(app)
 
 // HTTP framework for socket
-const port = process.env.PORT || 8000
+const port = process.env.PORT || 3000
 server.listen(port, function(){
     console.log('Interactive browser Multiuser v1 listening on port ' + port)
 })
 
-// TODO: solve CORS block to client's connection since socket.io v3 is used
 const io = require('socket.io')(server)
 
 let clients = [], adminConnected = false
 
+app.use(enforece.HTTPS({trustProtoHeader: true}))
 app.use(express.static('public'))
 
 // on get '/' send sender
