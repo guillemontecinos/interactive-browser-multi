@@ -367,7 +367,7 @@ input {
 
 .client-draw-container .client-main .client-canvas-wrapper {
   display: inline-block;
-  width: calc(100% - 250px);
+  width: 79%;
 }
 
 .client-draw-container .viewer-canvas-wrapper {
